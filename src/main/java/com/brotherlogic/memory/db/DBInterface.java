@@ -1,6 +1,8 @@
 package com.brotherlogic.memory.db;
 
-public class DBInterface
+import com.brotherlogic.memory.core.Memory;
+
+public interface DBInterface
 {
-   public void storeMemory(Memory mem)
+   public void storeMemory(Memory mem);
 }
