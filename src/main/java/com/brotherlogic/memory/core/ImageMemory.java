@@ -1,7 +1,7 @@
 package com.brotherlogic.memory.core;
 
-public class ImageMemory extends Memory
+public interface ImageMemory
 {
    /** The path to the image file */
-   private String path;
+   String getImagePath();
 }
