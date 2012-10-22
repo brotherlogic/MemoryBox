@@ -16,6 +16,25 @@ public class UntappdMemory extends Memory implements ImageMemory
       return imageFile.getAbsolutePath();
    }
 
+   @Override
+   public void setImagePath(String filePath)
+   {
+      imageFile = new File(filePath);
+   }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (!(o instanceof UntappdMemory))
+         return false;
+      UntappdMemory other = (UntappdMemory) o;
+
+      if (!other.imageFile.equals(imageFile))
+         return false;
+
+      return super.equals(o);
+   }
+
    public static void main(String[] args) throws IOException
    {
       UntappdMemory mem = new UntappdMemory();

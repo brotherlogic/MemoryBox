@@ -13,4 +13,14 @@ public abstract class Memory
    {
       timestamp = value;
    }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (!(o instanceof Memory))
+         return false;
+      Memory other = (Memory) o;
+
+      return other.timestamp.equals(timestamp);
+   }
 }
