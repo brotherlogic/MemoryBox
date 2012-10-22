@@ -2,8 +2,8 @@ package com.brotherlogic.memory.db;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.brotherlogic.memory.core.Memory;
 
@@ -11,15 +11,36 @@ public abstract class DBInterface
 {
    public abstract void storeMemory(Memory mem) throws IOException;
 
-   public List<String> deriveProperties(Memory mem)
+   private String getProperty(Method meth)
    {
-      List<String> strs = new LinkedList<String>();
+      String mName = meth.getName();
+      return mName.substring("get".length(), "get".length() + 1).toLowerCase()
+            + mName.substring("get".length() + 1);
+   }
 
+   /**
+    * Maps from the property name (accessible via get methods) to the
+    * corresponding responsible class
+    * 
+    * @param mem
+    *           The memory to derive
+    * @return A {@link Map} from property name to the responsible class
+    */
+   public Map<String, Class> deriveProperties(Memory mem)
+   {
+      Map<String, Class> strs = new TreeMap<String, Class>();
+
+      // Add all the interface methods
       for (Class inter : mem.getClass().getInterfaces())
-         System.out.println("interface = " + inter);
+         for (Method meth : inter.getMethods())
+            if (meth.getName().startsWith("get"))
+               strs.put(getProperty(meth), inter);
 
+      // Add all the class methods (excluding object methods)
       for (Method meth : mem.getClass().getMethods())
-         System.out.println(meth.getName() + " => " + meth.getDeclaringClass() + " and ");
+         if (meth.getName().startsWith("get") && !strs.containsKey(getProperty(meth)))
+            if (meth.getDeclaringClass() != Object.class)
+               strs.put(getProperty(meth), meth.getDeclaringClass());
 
       return strs;
    }
