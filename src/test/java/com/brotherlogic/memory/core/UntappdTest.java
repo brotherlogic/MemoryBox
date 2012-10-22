@@ -9,6 +9,13 @@ import com.brotherlogic.memory.db.DBInterface;
 
 public class UntappdTest extends TestCase
 {
+   @Override
+   public void setUp() throws IOException
+   {
+      // Clear the db
+      DBFactory.buildInterface().clear();
+   }
+
    public void testStoreUntappd() throws IOException
    {
       // Create an untapped object

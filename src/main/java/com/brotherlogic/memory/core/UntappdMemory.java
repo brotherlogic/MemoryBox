@@ -8,7 +8,7 @@ import com.brotherlogic.memory.db.MongoInterface;
 
 public class UntappdMemory extends Memory implements ImageMemory
 {
-   File imageFile;
+   File imageFile = new File("");
 
    @Override
    public String getImagePath()
@@ -42,6 +42,12 @@ public class UntappdMemory extends Memory implements ImageMemory
       inter.storeMemory(mem);
       DBProxy proxy = new DBProxy();
       proxy.storeMemory(mem);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Untappd: " + imageFile + ", " + super.toString();
    }
 
 }
