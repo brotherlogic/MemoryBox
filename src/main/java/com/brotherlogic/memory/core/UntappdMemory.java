@@ -1,13 +1,18 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
-import java.io.IOException;
 
-import com.brotherlogic.memory.db.DBProxy;
-import com.brotherlogic.memory.db.MongoInterface;
+import org.json.JSONObject;
 
-public class UntappdMemory extends Memory implements ImageMemory
+public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
+   @Override
+   public int buildFromJSON(JSONObject obj)
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
    File imageFile = new File("");
 
    @Override
@@ -33,21 +38,6 @@ public class UntappdMemory extends Memory implements ImageMemory
          return false;
 
       return super.equals(o);
-   }
-
-   public static void main(String[] args) throws IOException
-   {
-      UntappdMemory mem = new UntappdMemory();
-      MongoInterface inter = new MongoInterface();
-      inter.storeMemory(mem);
-      DBProxy proxy = new DBProxy();
-      proxy.storeMemory(mem);
-   }
-
-   @Override
-   public String toString()
-   {
-      return "Untappd: " + imageFile + ", " + super.toString();
    }
 
 }

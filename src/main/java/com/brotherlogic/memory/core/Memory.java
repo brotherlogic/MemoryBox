@@ -2,7 +2,13 @@ package com.brotherlogic.memory.core;
 
 public abstract class Memory
 {
+   int version = 1;
    Long timestamp;
+
+   public int getVersion()
+   {
+      return version;
+   }
 
    public Long getTimestamp()
    {
