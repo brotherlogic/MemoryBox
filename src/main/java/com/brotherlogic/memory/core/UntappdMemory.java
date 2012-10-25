@@ -1,14 +1,17 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
-import java.io.IOException;
 
-import com.brotherlogic.memory.db.DBProxy;
-import com.brotherlogic.memory.db.MongoInterface;
-
+/**
+ * Representation of an Untappd Memory
+ * 
+ * @author simon
+ * 
+ */
 public class UntappdMemory extends Memory implements ImageMemory
 {
-   File imageFile = new File("");
+   /** The location of the file */
+   private File imageFile = new File("");
 
    @Override
    public String getImagePath()
@@ -17,13 +20,19 @@ public class UntappdMemory extends Memory implements ImageMemory
    }
 
    @Override
-   public void setImagePath(String filePath)
+   public void setImagePath(final String filePath)
    {
       imageFile = new File(filePath);
    }
 
    @Override
-   public boolean equals(Object o)
+   public int hashCode()
+   {
+      return super.hashCode() + imageFile.hashCode();
+   }
+
+   @Override
+   public boolean equals(final Object o)
    {
       if (!(o instanceof UntappdMemory))
          return false;
@@ -33,15 +42,6 @@ public class UntappdMemory extends Memory implements ImageMemory
          return false;
 
       return super.equals(o);
-   }
-
-   public static void main(String[] args) throws IOException
-   {
-      UntappdMemory mem = new UntappdMemory();
-      MongoInterface inter = new MongoInterface();
-      inter.storeMemory(mem);
-      DBProxy proxy = new DBProxy();
-      proxy.storeMemory(mem);
    }
 
    @Override
