@@ -8,22 +8,73 @@ import java.util.TreeMap;
 
 import com.brotherlogic.memory.core.Memory;
 
+/**
+ * Abstract class for dealing with the database
+ * 
+ * @author simon
+ * 
+ */
 public abstract class DBInterface
 {
-   public abstract void storeMemory(Memory mem) throws IOException;
+   /**
+    * Stores a memory in the DB
+    * 
+    * @param mem
+    *           The memory to be store
+    * @throws IOException
+    *            If there's a db error
+    */
+   public abstract void storeMemory(final Memory mem) throws IOException;
 
+   /**
+    * Retrieve a memory from the database
+    * 
+    * @param timestamp
+    *           The timestamp of the memory
+    * @param className
+    *           The type of memory to retrieve
+    * @return A built memory object
+    * @throws IOException
+    *            If something goes wrong with the db
+    */
    public abstract Memory retrieveMemory(long timestamp, String className) throws IOException;
 
+   /**
+    * Wipes the database
+    * 
+    * @throws IOException
+    *            if the database can't be wiped
+    */
    public abstract void clear() throws IOException;
 
-   private String getProperty(Method meth)
+   /**
+    * Helper method to get a property from the Method
+    * 
+    * @param meth
+    *           The Method to turn into a property
+    * @return The property so getBlah -> blah
+    */
+   private String getProperty(final Method meth)
    {
       String mName = meth.getName();
       return mName.substring("get".length(), "get".length() + 1).toLowerCase()
             + mName.substring("get".length() + 1);
    }
 
-   protected void setProperty(Memory obj, String propName, Object value) throws IOException
+   /**
+    * Sets a property on a given memory
+    * 
+    * @param obj
+    *           The object to run on
+    * @param propName
+    *           The property to set
+    * @param value
+    *           The value to set
+    * @throws IOException
+    *            If something goes wrong with DB access
+    */
+   protected final void setProperty(final Memory obj, final String propName, final Object value)
+         throws IOException
    {
       try
       {
@@ -47,7 +98,18 @@ public abstract class DBInterface
       }
    }
 
-   protected Object getObject(String property, Object obj) throws IOException
+   /**
+    * Gets a value for a given property
+    * 
+    * @param property
+    *           The property name to retrieve for
+    * @param obj
+    *           The object to get the property from
+    * @return The value of the property
+    * @throws IOException
+    *            If something goes wrong
+    */
+   protected final Object getObject(final String property, final Object obj) throws IOException
    {
       try
       {
@@ -79,12 +141,12 @@ public abstract class DBInterface
     *           The memory to derive
     * @return A {@link Map} from property name to the responsible class
     */
-   public Map<String, Class> deriveProperties(Memory mem)
+   public final Map<String, Class<?>> deriveProperties(final Memory mem)
    {
-      Map<String, Class> strs = new TreeMap<String, Class>();
+      Map<String, Class<?>> strs = new TreeMap<String, Class<?>>();
 
       // Add all the interface methods
-      for (Class inter : mem.getClass().getInterfaces())
+      for (Class<?> inter : mem.getClass().getInterfaces())
          for (Method meth : inter.getMethods())
             if (meth.getName().startsWith("get"))
                strs.put(getProperty(meth), inter);
