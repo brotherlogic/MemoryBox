@@ -23,4 +23,10 @@ public abstract class Memory
 
       return other.timestamp.equals(timestamp);
    }
+
+   @Override
+   public String toString()
+   {
+      return "Memory: " + timestamp;
+   }
 }
