@@ -2,16 +2,25 @@ package com.brotherlogic.memory.core;
 
 import java.io.File;
 
+import org.json.JSONObject;
+
 /**
  * Representation of an Untappd Memory
  * 
  * @author simon
  * 
  */
-public class UntappdMemory extends Memory implements ImageMemory
+public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
    /** The location of the file */
    private File imageFile = new File("");
+
+   @Override
+   public int buildFromJSON(final JSONObject obj)
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
 
    @Override
    public String getImagePath()

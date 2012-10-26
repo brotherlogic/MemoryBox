@@ -11,6 +11,19 @@ public abstract class Memory
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
 
+   /** The version of this memory - should iterate on changes */
+   private final int version = 1;
+
+   /**
+    * Get method for the version number
+    * 
+    * @return The version number of this memory
+    */
+   public int getVersion()
+   {
+      return version;
+   }
+
    /**
     * Get method for the timestamp
     * 

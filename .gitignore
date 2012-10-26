@@ -3,4 +3,8 @@ target/
 .settings
 .project
 .classpath
+<<<<<<< HEAD
 .checkstyle
+=======
+etc/config.txt
+>>>>>>> c5bf0cbb8b0a46f40f2b7d5a0394a741749c797c
