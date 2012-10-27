@@ -16,6 +16,10 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
 {
    private static final int VERSION = 1;
 
+   String beerName = "";
+
+   File imageFile = new File("");
+
    @Override
    public int buildFromJSON(JSONObject obj) throws JSONException
    {
@@ -33,26 +37,6 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return version + VERSION;
    }
 
-   File imageFile = new File("");
-
-   @Override
-   public String getImagePath()
-   {
-      return imageFile.getAbsolutePath();
-   }
-
-   @Override
-   public void setImagePath(final String filePath)
-   {
-      imageFile = new File(filePath);
-   }
-
-   @Override
-   public int hashCode()
-   {
-      return super.hashCode() + imageFile.hashCode();
-   }
-
    @Override
    public boolean equals(final Object o)
    {
@@ -64,6 +48,34 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
          return false;
 
       return super.equals(o);
+   }
+
+   public String getBeerName()
+   {
+      return beerName;
+   }
+
+   @Override
+   public String getImagePath()
+   {
+      return imageFile.getAbsolutePath();
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return super.hashCode() + imageFile.hashCode();
+   }
+
+   public void setBeerName(String beerName)
+   {
+      this.beerName = beerName;
+   }
+
+   @Override
+   public void setImagePath(final String filePath)
+   {
+      imageFile = new File(filePath);
    }
 
    @Override

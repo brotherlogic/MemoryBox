@@ -2,13 +2,10 @@ package com.brotherlogic.memory.core;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
-import com.brotherlogic.memory.db.DBFactory.Mode;
 import com.brotherlogic.memory.db.DBInterface;
 
 /**
@@ -19,18 +16,6 @@ import com.brotherlogic.memory.db.DBInterface;
  */
 public class UntappdTest
 {
-   /**
-    * Prepares for the test to run
-    * 
-    * @throws IOException
-    *            if we can't clear the database
-    */
-   @Before
-   public final void setUp() throws IOException
-   {
-      DBFactory.setMode(Mode.TESTING);
-      DBFactory.buildInterface().clear();
-   }
 
    /**
     * Tests that we can store and retrieve Untappd objects

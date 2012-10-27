@@ -114,7 +114,7 @@ public abstract class DBInterface
     *           The class type of memory to retrieve from
     * @return The latest memory we have stored
     */
-   public abstract Memory retrieveLatestMemory(Class<?> cls);
+   public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
 
    /**
     * Retrieve a memory from the database

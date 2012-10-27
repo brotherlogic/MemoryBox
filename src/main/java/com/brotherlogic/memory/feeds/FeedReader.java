@@ -1,5 +1,7 @@
 package com.brotherlogic.memory.feeds;
 
+import java.io.IOException;
+
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
 
@@ -19,6 +21,21 @@ public abstract class FeedReader
    public abstract Memory probeFeed();
 
    /**
+    * Updates all the feed
+    */
+   public void update() throws IOException
+   {
+      Memory mem = probeFeed();
+      Memory topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
+
+      // Check on the versions
+      if (mem.getVersion() != topDBMem.getVersion())
+         updateAllMemories();
+      else if (mem.getTimestamp() > topDBMem.getTimestamp())
+         updateMemories(topDBMem.getTimestamp());
+   }
+
+   /**
     * Update all the memories - refresh the memories
     */
    public abstract void updateAllMemories();
@@ -30,19 +47,4 @@ public abstract class FeedReader
     *           The latest time to pull memories up to
     */
    public abstract void updateMemories(long timestamp);
-
-   /**
-    * Updates all the feed
-    */
-   public void update()
-   {
-      Memory mem = probeFeed();
-      Memory topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
-
-      // Check on the versions
-      if (mem.getVersion() != topDBMem.getVersion())
-         updateAllMemories();
-      else if (mem.getTimestamp() > topDBMem.getTimestamp())
-         updateMemories(topDBMem.getTimestamp());
-   }
 }
