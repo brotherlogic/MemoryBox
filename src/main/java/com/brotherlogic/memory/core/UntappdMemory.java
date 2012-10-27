@@ -1,16 +1,30 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
+import java.text.ParseException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
+   private static final int VERSION = 1;
+
    @Override
-   public int buildFromJSON(JSONObject obj)
+   public int buildFromJSON(JSONObject obj) throws JSONException
    {
-      // TODO Auto-generated method stub
-      return 0;
+      int version = super.getVersion();
+
+      System.out.println("HERE: " + obj);
+      try
+      {
+         setTimestamp(obj.getString("created_at"));
+      }
+      catch (ParseException e)
+      {
+         System.err.println("Cannot parse: " + obj.getString("created_at"));
+      }
+      return version + VERSION;
    }
 
    File imageFile = new File("");

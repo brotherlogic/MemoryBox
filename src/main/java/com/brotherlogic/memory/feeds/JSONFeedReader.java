@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONException;
 
@@ -16,6 +18,7 @@ import com.brotherlogic.memory.core.JSONConstructable;
 
 public abstract class JSONFeedReader
 {
+   private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.JSONFeedReader");
 
    /**
     * Gets the URL for the given feed - pagination if necessary (ignored if < 0)
@@ -30,11 +33,11 @@ public abstract class JSONFeedReader
 
    private final Stack<JSONConstructable> readObjects = new Stack<JSONConstructable>();
 
-   boolean updateRequired = false;
+   boolean updateRequired = true;
 
-   protected void requireUpdate()
+   protected void noUpdate()
    {
-      updateRequired = true;
+      updateRequired = false;
    }
 
    private Collection<JSONConstructable> popReadObjects()
@@ -47,6 +50,7 @@ public abstract class JSONFeedReader
 
    private String read(URL urlToRead) throws IOException
    {
+      logger.log(Level.INFO, "Reading " + urlToRead);
       StringBuffer readText = new StringBuffer();
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(urlToRead.openStream()));

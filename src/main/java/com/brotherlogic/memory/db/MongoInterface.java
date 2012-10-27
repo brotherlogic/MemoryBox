@@ -19,6 +19,12 @@ import com.mongodb.WriteResult;
 
 public class MongoInterface extends DBInterface
 {
+   @Override
+   public DownloadQueue getDownloadQueue()
+   {
+      return null;
+   }
+
    private DB mongo;
 
    private final String DB_NAME = "memorybox";

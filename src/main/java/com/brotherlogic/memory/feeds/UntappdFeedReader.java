@@ -2,6 +2,8 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,6 +13,9 @@ import com.brotherlogic.memory.core.UntappdMemory;
 
 public class UntappdFeedReader extends JSONFeedReader
 {
+   private static Logger logger = Logger
+         .getLogger("com.brotherlogic.memory.feeds.UntappdFeedReader");
+
    String baseURL = "http://api.untappd.com/v4";
    String username;
    boolean checkedVersion = false;
@@ -42,13 +47,15 @@ public class UntappdFeedReader extends JSONFeedReader
       long nextVal = obj.getJSONObject("response").getJSONObject("pagination").getLong("max_id");
 
       JSONArray arr = obj.getJSONObject("response").getJSONObject("checkins").getJSONArray("items");
+      logger.log(Level.INFO, "Read " + arr.length() + " objects");
+
       for (int i = 0; i < arr.length(); i++)
       {
          UntappdMemory mem = new UntappdMemory();
          int version = mem.buildFromJSON(arr.getJSONObject(i));
 
-         if (!checkedVersion && updateNeeded(version))
-            requireUpdate();
+         if (!checkedVersion && !updateNeeded(version))
+            noUpdate();
 
          addObjectToRead(mem);
       }
@@ -63,7 +70,7 @@ public class UntappdFeedReader extends JSONFeedReader
    public static void main(String[] args) throws Exception
    {
       UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
-      reader.gatherObjects(25);
+      System.out.println(reader.gatherObjects(25));
    }
 
 }
