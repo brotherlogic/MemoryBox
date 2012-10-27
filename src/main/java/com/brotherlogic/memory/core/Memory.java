@@ -1,5 +1,9 @@
 package com.brotherlogic.memory.core;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 /**
  * Abstract representation of a Memory
  * 
@@ -10,6 +14,14 @@ public abstract class Memory
 {
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
+
+   int version = 1;
+   DateFormat df;
+
+   public int getVersion()
+   {
+      return version;
+   }
 
    /**
     * Get method for the timestamp
@@ -30,6 +42,13 @@ public abstract class Memory
    public final void setTimestamp(final Long value)
    {
       timestamp = value;
+   }
+
+   public void setTimestamp(String value) throws ParseException
+   {
+      if (df == null)
+         df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+      timestamp = df.parse(value).getTime();
    }
 
    @Override

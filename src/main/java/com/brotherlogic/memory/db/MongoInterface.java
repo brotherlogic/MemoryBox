@@ -30,6 +30,12 @@ public class MongoInterface extends DBInterface
    /** The underlying database */
    private DB mongo;
 
+   @Override
+   public DownloadQueue getDownloadQueue()
+   {
+      return null;
+   }
+
    /** The main database */
    private static final String DB_NAME = "memorybox";
 

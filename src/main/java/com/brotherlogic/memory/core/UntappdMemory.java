@@ -1,6 +1,10 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
+import java.text.ParseException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Representation of an Untappd Memory
@@ -8,10 +12,28 @@ import java.io.File;
  * @author simon
  * 
  */
-public class UntappdMemory extends Memory implements ImageMemory
+public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
-   /** The location of the file */
-   private File imageFile = new File("");
+   private static final int VERSION = 1;
+
+   @Override
+   public int buildFromJSON(JSONObject obj) throws JSONException
+   {
+      int version = super.getVersion();
+
+      System.out.println("HERE: " + obj);
+      try
+      {
+         setTimestamp(obj.getString("created_at"));
+      }
+      catch (ParseException e)
+      {
+         System.err.println("Cannot parse: " + obj.getString("created_at"));
+      }
+      return version + VERSION;
+   }
+
+   File imageFile = new File("");
 
    @Override
    public String getImagePath()
