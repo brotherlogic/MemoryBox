@@ -10,6 +10,9 @@ import com.brotherlogic.memory.core.Memory;
 
 public abstract class DBInterface
 {
+
+   public abstract DownloadQueue getDownloadQueue();
+
    public abstract void storeMemory(Memory mem) throws IOException;
 
    public abstract Memory retrieveMemory(long timestamp, String className) throws IOException;
