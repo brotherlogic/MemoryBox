@@ -25,7 +25,7 @@ public abstract class JSONFeedReader extends FeedReader
 
    private final Stack<JSONConstructable> readObjects = new Stack<JSONConstructable>();
 
-   boolean updateRequired = true;
+   boolean updateRequired = false;
 
    protected void addObjectToRead(JSONConstructable cons)
    {

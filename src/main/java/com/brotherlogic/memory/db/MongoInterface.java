@@ -107,10 +107,16 @@ public class MongoInterface extends DBInterface
 
    }
 
-   private DBCollection getCollection(Class<?> cls)
+   private DBCollection getCollection(Class<?> cls) throws IOException
    {
-      return mongo.getCollection(cls.getName().substring(
-            "com.brotherlogic.memory.core".length() + 1));
+      // Make sure we have a mongo instance up
+      connect();
+
+      // Have to init the collection if it doesn't exist
+      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
+      if (!mongo.collectionExists(colName))
+         mongo.createCollection(colName, new BasicDBObject());
+      return mongo.getCollection(colName);
    }
 
    @Override
@@ -122,9 +128,10 @@ public class MongoInterface extends DBInterface
    @Override
    public Memory retrieveLatestMemory(Class<?> cls) throws IOException
    {
-      // Have to work our way through the memories to find the first match
+      // Have to work our way through the memories to find the first match; -1
+      // means descending order
       DBObject querysort = new BasicDBObject();
-      querysort.put("timestamp", 1);
+      querysort.put("timestamp", -1);
       DBCollection col = getCollection(Memory.class);
       DBCursor cursor = col.find(new BasicDBObject()).sort(querysort);
       while (cursor.hasNext())

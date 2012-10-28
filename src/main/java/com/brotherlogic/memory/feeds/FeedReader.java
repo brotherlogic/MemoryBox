@@ -28,8 +28,8 @@ public abstract class FeedReader
       Memory mem = probeFeed();
       Memory topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
 
-      // Check on the versions
-      if (mem.getVersion() != topDBMem.getVersion())
+      // Check on the versions - we may not have got any DB Mems
+      if (topDBMem == null || mem.getVersion() != topDBMem.getVersion())
          updateAllMemories();
       else if (mem.getTimestamp() > topDBMem.getTimestamp())
          updateMemories(topDBMem.getTimestamp());
