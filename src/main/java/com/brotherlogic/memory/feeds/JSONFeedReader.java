@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -15,51 +16,16 @@ import java.util.logging.Logger;
 import org.json.JSONException;
 
 import com.brotherlogic.memory.core.JSONConstructable;
+import com.brotherlogic.memory.core.Memory;
+import com.brotherlogic.memory.db.DBFactory;
 
-public abstract class JSONFeedReader
+public abstract class JSONFeedReader extends FeedReader
 {
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.JSONFeedReader");
-
-   /**
-    * Gets the URL for the given feed - pagination if necessary (ignored if < 0)
-    * 
-    * @param pagination
-    *           The page/value to paginate
-    * @return The URL for the feed
-    */
-   protected abstract URL getFeedURL(long pagination) throws MalformedURLException;
-
-   protected abstract long processFeedText(String text) throws JSONException;
 
    private final Stack<JSONConstructable> readObjects = new Stack<JSONConstructable>();
 
    boolean updateRequired = true;
-
-   protected void noUpdate()
-   {
-      updateRequired = false;
-   }
-
-   private Collection<JSONConstructable> popReadObjects()
-   {
-      List<JSONConstructable> consList = new LinkedList<JSONConstructable>();
-      while (readObjects.size() > 0)
-         consList.add(readObjects.pop());
-      return consList;
-   }
-
-   private String read(URL urlToRead) throws IOException
-   {
-      logger.log(Level.INFO, "Reading " + urlToRead);
-      StringBuffer readText = new StringBuffer();
-
-      BufferedReader reader = new BufferedReader(new InputStreamReader(urlToRead.openStream()));
-      for (String line = reader.readLine(); line != null; line = reader.readLine())
-         readText.append(line);
-      reader.close();
-
-      return readText.toString();
-   }
 
    protected void addObjectToRead(JSONConstructable cons)
    {
@@ -86,5 +52,117 @@ public abstract class JSONFeedReader
       }
 
       return objects;
+   }
+
+   /**
+    * Gets the URL for the given feed - pagination if necessary (ignored if < 0)
+    * 
+    * @param pagination
+    *           The page/value to paginate
+    * @return The URL for the feed
+    */
+   protected abstract URL getFeedURL(long pagination) throws MalformedURLException;
+
+   protected void noUpdate()
+   {
+      updateRequired = false;
+   }
+
+   private Collection<JSONConstructable> popReadObjects()
+   {
+      List<JSONConstructable> consList = new LinkedList<JSONConstructable>();
+      while (readObjects.size() > 0)
+         consList.add(readObjects.pop());
+      return consList;
+   }
+
+   @Override
+   public Memory probeFeed() throws IOException
+   {
+      try
+      {
+         Collection<JSONConstructable> cons = gatherObjects(1);
+         List<Memory> memorys = new LinkedList<Memory>();
+         for (JSONConstructable con : cons)
+            memorys.add((Memory) con);
+         Collections.sort(memorys);
+         return memorys.get(0);
+      }
+      catch (JSONException e)
+      {
+         throw new IOException(e);
+      }
+   }
+
+   protected abstract long processFeedText(String text) throws JSONException;
+
+   private String read(URL urlToRead) throws IOException
+   {
+      logger.log(Level.INFO, "Reading " + urlToRead);
+      StringBuffer readText = new StringBuffer();
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(urlToRead.openStream()));
+      for (String line = reader.readLine(); line != null; line = reader.readLine())
+         readText.append(line);
+      reader.close();
+
+      logger.log(Level.INFO, "Got " + readText);
+      return readText.toString();
+   }
+
+   @Override
+   public void updateAllMemories() throws IOException
+   {
+      updateRequired = true;
+      try
+      {
+         Collection<JSONConstructable> objects = gatherObjects(Integer.MAX_VALUE);
+         for (JSONConstructable obj : objects)
+            DBFactory.buildInterface().storeMemory((Memory) obj);
+      }
+      catch (JSONException e)
+      {
+         throw new IOException(e);
+      }
+   }
+
+   @Override
+   public void updateMemories(long timestamp) throws IOException
+   {
+      try
+      {
+         List<JSONConstructable> objects = new LinkedList<JSONConstructable>();
+
+         long pagination = -1;
+         boolean timestampOver = false;
+         while (!timestampOver)
+         {
+            // Pull the feed and build the objects
+            String feedText = read(getFeedURL(pagination));
+            long nextPage = processFeedText(feedText);
+            for (JSONConstructable obj : popReadObjects())
+               if (((Memory) obj).getTimestamp() > timestamp)
+                  objects.add(obj);
+               else
+                  timestampOver = true;
+
+            if (nextPage < 0)
+               break;
+            else
+               pagination = nextPage;
+         }
+
+         // Update all the objects
+         for (JSONConstructable obj : objects)
+         {
+            Memory m = (Memory) obj;
+            DBFactory.buildInterface().storeMemory(m);
+         }
+      }
+      catch (JSONException e)
+      {
+         e.printStackTrace();
+      }
+
    }
 }

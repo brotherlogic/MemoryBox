@@ -167,7 +167,7 @@ public abstract class DBInterface
    }
 
    /**
-    * Stores a memory in the DB
+    * Stores a memory in the DB - will update if memory already exists!
     * 
     * @param mem
     *           The memory to be store
@@ -175,4 +175,5 @@ public abstract class DBInterface
     *            If there's a db error
     */
    public abstract void storeMemory(final Memory mem) throws IOException;
+
 }

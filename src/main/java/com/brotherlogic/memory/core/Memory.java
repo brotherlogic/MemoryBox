@@ -10,17 +10,29 @@ import java.text.SimpleDateFormat;
  * @author simon
  * 
  */
-public abstract class Memory
+public abstract class Memory implements Comparable<Memory>
 {
+   DateFormat df;
+
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
 
    int version = 1;
-   DateFormat df;
 
-   public int getVersion()
+   @Override
+   public int compareTo(Memory o)
    {
-      return version;
+      return timestamp.compareTo(o.timestamp);
+   }
+
+   @Override
+   public boolean equals(final Object o)
+   {
+      if (!(o instanceof Memory))
+         return false;
+      Memory other = (Memory) o;
+
+      return other.timestamp.equals(timestamp);
    }
 
    /**
@@ -31,6 +43,17 @@ public abstract class Memory
    public final Long getTimestamp()
    {
       return timestamp;
+   }
+
+   public int getVersion()
+   {
+      return version;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return timestamp.hashCode();
    }
 
    /**
@@ -49,22 +72,6 @@ public abstract class Memory
       if (df == null)
          df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
       timestamp = df.parse(value).getTime();
-   }
-
-   @Override
-   public int hashCode()
-   {
-      return timestamp.hashCode();
-   }
-
-   @Override
-   public boolean equals(final Object o)
-   {
-      if (!(o instanceof Memory))
-         return false;
-      Memory other = (Memory) o;
-
-      return other.timestamp.equals(timestamp);
    }
 
    @Override

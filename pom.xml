@@ -81,8 +81,7 @@
             </execution>
           </executions>
           <configuration>
-            <executable>deploy.sh</executable>
-            <mainClass>com.brotherlogic.memory.MemoryBox</mainClass>
+            <mainClass>com.brotherlogic.memory.CommandLineUpdate</mainClass>
           </configuration>
           
         </plugin>

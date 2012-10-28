@@ -25,7 +25,6 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    {
       int version = super.getVersion();
 
-      System.out.println("HERE: " + obj);
       try
       {
          setTimestamp(obj.getString("created_at"));

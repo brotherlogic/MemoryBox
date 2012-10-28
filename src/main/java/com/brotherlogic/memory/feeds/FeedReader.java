@@ -18,7 +18,7 @@ public abstract class FeedReader
     * 
     * @return The latest Memory present in the feed
     */
-   public abstract Memory probeFeed();
+   public abstract Memory probeFeed() throws IOException;
 
    /**
     * Updates all the feed
@@ -38,7 +38,7 @@ public abstract class FeedReader
    /**
     * Update all the memories - refresh the memories
     */
-   public abstract void updateAllMemories();
+   public abstract void updateAllMemories() throws IOException;
 
    /**
     * Update the memories up to the latest version
@@ -46,5 +46,5 @@ public abstract class FeedReader
     * @param timestamp
     *           The latest time to pull memories up to
     */
-   public abstract void updateMemories(long timestamp);
+   public abstract void updateMemories(long timestamp) throws IOException;
 }
