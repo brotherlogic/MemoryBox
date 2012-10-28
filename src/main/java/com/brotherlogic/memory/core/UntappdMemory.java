@@ -1,6 +1,10 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
+import java.text.ParseException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Representation of an Untappd Memory
@@ -8,27 +12,28 @@ import java.io.File;
  * @author simon
  * 
  */
-public class UntappdMemory extends Memory implements ImageMemory
+public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
-   /** The location of the file */
-   private File imageFile = new File("");
+   private static final int VERSION = 1;
+
+   String beerName = "";
+
+   File imageFile = new File("");
 
    @Override
-   public String getImagePath()
+   public int buildFromJSON(JSONObject obj) throws JSONException
    {
-      return imageFile.getAbsolutePath();
-   }
+      int version = super.getVersion();
 
-   @Override
-   public void setImagePath(final String filePath)
-   {
-      imageFile = new File(filePath);
-   }
-
-   @Override
-   public int hashCode()
-   {
-      return super.hashCode() + imageFile.hashCode();
+      try
+      {
+         setTimestamp(obj.getString("created_at"));
+      }
+      catch (ParseException e)
+      {
+         System.err.println("Cannot parse: " + obj.getString("created_at"));
+      }
+      return version + VERSION;
    }
 
    @Override
@@ -42,6 +47,34 @@ public class UntappdMemory extends Memory implements ImageMemory
          return false;
 
       return super.equals(o);
+   }
+
+   public String getBeerName()
+   {
+      return beerName;
+   }
+
+   @Override
+   public String getImagePath()
+   {
+      return imageFile.getAbsolutePath();
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return super.hashCode() + imageFile.hashCode();
+   }
+
+   public void setBeerName(String beerName)
+   {
+      this.beerName = beerName;
+   }
+
+   @Override
+   public void setImagePath(final String filePath)
+   {
+      imageFile = new File(filePath);
    }
 
    @Override

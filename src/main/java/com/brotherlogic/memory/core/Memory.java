@@ -1,15 +1,39 @@
 package com.brotherlogic.memory.core;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 /**
  * Abstract representation of a Memory
  * 
  * @author simon
  * 
  */
-public abstract class Memory
+public abstract class Memory implements Comparable<Memory>
 {
+   DateFormat df;
+
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
+
+   int version = 1;
+
+   @Override
+   public int compareTo(Memory o)
+   {
+      return timestamp.compareTo(o.timestamp);
+   }
+
+   @Override
+   public boolean equals(final Object o)
+   {
+      if (!(o instanceof Memory))
+         return false;
+      Memory other = (Memory) o;
+
+      return other.timestamp.equals(timestamp);
+   }
 
    /**
     * Get method for the timestamp
@@ -19,6 +43,17 @@ public abstract class Memory
    public final Long getTimestamp()
    {
       return timestamp;
+   }
+
+   public int getVersion()
+   {
+      return version;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return timestamp.hashCode();
    }
 
    /**
@@ -32,20 +67,11 @@ public abstract class Memory
       timestamp = value;
    }
 
-   @Override
-   public int hashCode()
+   public void setTimestamp(String value) throws ParseException
    {
-      return timestamp.hashCode();
-   }
-
-   @Override
-   public boolean equals(final Object o)
-   {
-      if (!(o instanceof Memory))
-         return false;
-      Memory other = (Memory) o;
-
-      return other.timestamp.equals(timestamp);
+      if (df == null)
+         df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+      timestamp = df.parse(value).getTime();
    }
 
    @Override
