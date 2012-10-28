@@ -11,22 +11,37 @@ import org.json.JSONObject;
 
 import com.brotherlogic.memory.core.UntappdMemory;
 
+/**
+ * Feed Reader for Untappd
+ * 
+ * @author simon
+ * 
+ */
 public class UntappdFeedReader extends JSONFeedReader
 {
+   /** Local logger */
    private static Logger logger = Logger
          .getLogger("com.brotherlogic.memory.feeds.UntappdFeedReader");
 
-   String baseURL = "http://api.untappd.com/v4";
-   String username;
-   boolean checkedVersion = false;
+   /** The base URL for accessing the feed */
+   private final String baseURL = "http://api.untappd.com/v4";
 
-   public UntappdFeedReader(String user)
+   /** The user name to pull the feed for */
+   private final String username;
+
+   /**
+    * Constructor
+    * 
+    * @param user
+    *           The username to build the feed for
+    */
+   public UntappdFeedReader(final String user)
    {
       username = user;
    }
 
    @Override
-   protected URL getFeedURL(long pagination) throws MalformedURLException
+   protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
       String urlText = baseURL + "/user/checkins/" + username;
 
@@ -35,16 +50,20 @@ public class UntappdFeedReader extends JSONFeedReader
             + Config.getParameter("untappd.id");
 
       if (pagination > 0)
-         urlText += "&offset=" + pagination;
+         urlText += "&max_id=" + pagination;
 
       return new URL(urlText);
    }
 
    @Override
-   protected long processFeedText(String text) throws JSONException
+   protected long processFeedText(final String text) throws JSONException
    {
       JSONObject obj = new JSONObject(text);
-      long nextVal = obj.getJSONObject("response").getJSONObject("pagination").getLong("max_id");
+
+      // Read the next value - max_id is blank when we're done
+      long nextVal = -1;
+      if (obj.getJSONObject("response").getJSONObject("pagination").getString("max_id").length() > 0)
+         nextVal = obj.getJSONObject("response").getJSONObject("pagination").getLong("max_id");
 
       JSONArray arr = obj.getJSONObject("response").getJSONObject("checkins").getJSONArray("items");
       logger.log(Level.INFO, "Read " + arr.length() + " objects");
@@ -52,25 +71,9 @@ public class UntappdFeedReader extends JSONFeedReader
       for (int i = 0; i < arr.length(); i++)
       {
          UntappdMemory mem = new UntappdMemory();
-         int version = mem.buildFromJSON(arr.getJSONObject(i));
-
-         if (!checkedVersion && !updateNeeded(version))
-            noUpdate();
-
+         mem.buildFromJSON(arr.getJSONObject(i));
          addObjectToRead(mem);
       }
       return nextVal;
    }
-
-   private boolean updateNeeded(int readVersion)
-   {
-      return false;
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
-      System.out.println(reader.gatherObjects(25));
-   }
-
 }

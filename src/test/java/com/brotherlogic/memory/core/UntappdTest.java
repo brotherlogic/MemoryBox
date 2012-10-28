@@ -2,21 +2,29 @@ package com.brotherlogic.memory.core;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DBInterface;
 
-public class UntappdTest extends TestCase
+/**
+ * Testing that we can handle Untappd stuff correctly
+ * 
+ * @author simon
+ * 
+ */
+public class UntappdTest
 {
-   @Override
-   public void setUp() throws IOException
-   {
-      // Clear the db
-      DBFactory.buildInterface().clear();
-   }
 
-   public void testStoreUntappd() throws IOException
+   /**
+    * Tests that we can store and retrieve Untappd objects
+    * 
+    * @throws IOException
+    *            if we can't read from the database
+    */
+   @Test
+   public final void testStoreUntappd() throws IOException
    {
       // Create an untapped object
       UntappdMemory untapd = new UntappdMemory();
@@ -29,6 +37,6 @@ public class UntappdTest extends TestCase
 
       // Retrieve it
       UntappdMemory mem = (UntappdMemory) db.retrieveMemory(12345L, untapd.getClass().getName());
-      assertTrue("Stored object does not match the object we stored!", untapd.equals(mem));
+      Assert.assertTrue("Stored object does not match the object we stored!", untapd.equals(mem));
    }
 }

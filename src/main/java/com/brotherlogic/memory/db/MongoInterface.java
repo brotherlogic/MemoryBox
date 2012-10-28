@@ -13,72 +13,164 @@ import org.bson.types.ObjectId;
 import com.brotherlogic.memory.core.Memory;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.WriteResult;
 
+/**
+ * DB Interface down to mongo
+ * 
+ * @author simon
+ * 
+ */
 public class MongoInterface extends DBInterface
 {
+   /** The main database */
+   private static final String DB_NAME = "memorybox";
+
+   /** The test database */
+   private static final String DB_NAME_TEST = "memorybox_test";
+
+   /** The field name for setting references */
+   private static final String REF_NAME = "ref_id";
+
+   /** The current mode that the database is running in */
+   private final DBFactory.Mode currMode;
+
+   /** The underlying database */
+   private DB mongo;
+
+   /**
+    * Constructor
+    * 
+    * @param mode
+    *           The mode to connect in (prod/test)
+    */
+   public MongoInterface(final DBFactory.Mode mode)
+   {
+      currMode = mode;
+   }
+
+   /**
+    * Clear the database
+    * 
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   @Override
+   public final void clear() throws IOException
+   {
+      connect();
+      mongo.dropDatabase();
+   }
+
+   /**
+    * Connect to the database
+    * 
+    * @throws IOException
+    *            if we can't connect
+    */
+   private void connect() throws IOException
+   {
+      if (mongo == null)
+      {
+         Mongo m = new Mongo();
+
+         if (currMode == DBFactory.Mode.PRODUCTION)
+            mongo = m.getDB(DB_NAME);
+         else if (currMode == DBFactory.Mode.TESTING)
+            mongo = m.getDB(DB_NAME_TEST);
+      }
+   }
+
+   /**
+    * ENrich a memory with other lower level information
+    * 
+    * @param obj
+    *           The Memory to enrich
+    * @param id
+    *           The id of the reference
+    * @param properties
+    *           The properties with which to enrich
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   public final void enrichMemory(final Memory obj, final ObjectId id,
+         final Map<String, Class<?>> properties) throws IOException
+   {
+      // Ignore the core memory properties!
+      Set<Class<?>> classes = new HashSet<Class<?>>(properties.values());
+      classes.remove(Memory.class);
+      for (Class<?> cls : classes)
+         setProperties(cls, obj, properties, id);
+
+   }
+
+   private DBCollection getCollection(Class<?> cls) throws IOException
+   {
+      // Make sure we have a mongo instance up
+      connect();
+
+      // Have to init the collection if it doesn't exist
+      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
+      if (!mongo.collectionExists(colName))
+         mongo.createCollection(colName, new BasicDBObject());
+      return mongo.getCollection(colName);
+   }
+
    @Override
    public DownloadQueue getDownloadQueue()
    {
       return null;
    }
 
-   private DB mongo;
-
-   private final String DB_NAME = "memorybox";
-   private final String REF_NAME = "ref_id";
-
    @Override
-   public void clear() throws IOException
+   public Memory retrieveLatestMemory(Class<?> cls) throws IOException
    {
-      connect();
-      mongo.dropDatabase();
-   }
-
-   private void connect() throws IOException
-   {
-      if (mongo == null)
+      // Have to work our way through the memories to find the first match; -1
+      // means descending order
+      DBObject querysort = new BasicDBObject();
+      querysort.put("timestamp", -1);
+      DBCollection col = getCollection(Memory.class);
+      DBCursor cursor = col.find(new BasicDBObject()).sort(querysort);
+      while (cursor.hasNext())
       {
-         Mongo m = new Mongo();
-         mongo = m.getDB(DB_NAME);
+         DBObject memoryObj = cursor.next();
+         ObjectId refId = (ObjectId) memoryObj.get("_id");
+
+         // Secondary query
+         DBObject query = new BasicDBObject();
+         query.put(REF_NAME, refId);
+         DBCollection qCol = getCollection(cls);
+         DBObject obj = qCol.findOne(query);
+
+         if (obj != null)
+            return retrieveMemory((Long) memoryObj.get("timestamp"), cls.getName());
       }
-   }
 
-   private void setProperties(Class cls, Memory obj, Map<String, Class> properties, ObjectId refId)
-         throws IOException
-   {
-      String collection = cls.getName();
-
-      BasicDBObject query = new BasicDBObject();
-      query.put(REF_NAME, refId);
-      DBObject retObj = mongo.getCollection(collection).findOne(query);
-
-      // Match up these properties
-      for (Entry<String, Class> propEntry : properties.entrySet())
-         if (propEntry.getValue().equals(cls))
-            setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
+      return null;
    }
 
    @Override
-   public Memory retrieveMemory(long timestamp, String className) throws IOException
+   public final Memory retrieveMemory(final long timestamp, final String className)
+         throws IOException
    {
       try
       {
          // Create the given object
-         Class objType = Class.forName(className);
-         Constructor objCons = objType.getConstructor(new Class[0]);
+         Class<?> objType = Class.forName(className);
+         Constructor<?> objCons = objType.getConstructor(new Class[0]);
          Memory memory = (Memory) objCons.newInstance(new Object[0]);
 
          // Get the ID number
          DBObject query = new BasicDBObject();
          query.put("timestamp", timestamp);
-         DBObject res = mongo.getCollection(Memory.class.getName()).findOne(query);
+         DBObject res = getCollection(Memory.class).findOne(query);
 
          ObjectId id = (ObjectId) res.get("_id");
          memory.setTimestamp(timestamp);
-         Map<String, Class> properties = deriveProperties(memory);
+         Map<String, Class<?>> properties = deriveProperties(memory);
          enrichMemory(memory, id, properties);
          return memory;
       }
@@ -104,42 +196,58 @@ public class MongoInterface extends DBInterface
       }
    }
 
-   public void enrichMemory(Memory obj, ObjectId id, Map<String, Class> properties)
-         throws IOException
+   /**
+    * Sets the properties on a given class
+    * 
+    * @param cls
+    *           The class name to set for
+    * @param obj
+    *           The object to set the properties on
+    * @param properties
+    *           A {@link Map} from the property name to the class that
+    *           implements it
+    * @param refId
+    *           The underlying memory reference
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   private void setProperties(final Class<?> cls, final Memory obj,
+         final Map<String, Class<?>> properties, final ObjectId refId) throws IOException
    {
-      // Ignore the core memory properties!
-      Set<Class> classes = new HashSet<Class>(properties.values());
-      classes.remove(Memory.class);
-      for (Class cls : classes)
-         setProperties(cls, obj, properties, id);
+      BasicDBObject query = new BasicDBObject();
+      query.put(REF_NAME, refId);
+      DBObject retObj = getCollection(cls).findOne(query);
 
+      // Match up these properties
+      for (Entry<String, Class<?>> propEntry : properties.entrySet())
+         if (propEntry.getValue().equals(cls))
+            setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
    }
 
-   @Override
-   public void storeMemory(Memory mem) throws IOException
-   {
-      String className = mem.getClass().getCanonicalName();
-      Map<String, Class> propertyMap = deriveProperties(mem);
-
-      // Store the memory in the memory table
-      ObjectId id = store(Memory.class, mem, propertyMap, null);
-
-      // Work through the other objects - ignore the Memory core stuff
-      Set<Class> allClasses = new HashSet<Class>(propertyMap.values());
-      allClasses.remove(Memory.class);
-      for (Class storeClass : allClasses)
-         store(storeClass, mem, propertyMap, id);
-   }
-
-   private ObjectId store(Class storeType, Object toStore, Map<String, Class> potProperties,
-         ObjectId refId) throws IOException
+   /**
+    * Store an object in the database
+    * 
+    * @param storeType
+    *           The type to store
+    * @param toStore
+    *           The object to store
+    * @param potProperties
+    *           The properties of the object
+    * @param refId
+    *           The reference ID
+    * @return Gets the underlying ID of the object
+    * @throws IOException
+    *            If we can't reach the databsae
+    */
+   private ObjectId store(final Class<?> storeType, final Object toStore,
+         final Map<String, Class<?>> potProperties, final ObjectId refId) throws IOException
    {
       connect();
 
-      String collection = storeType.getCanonicalName();
+      DBCollection col = getCollection(storeType);
       BasicDBObject obj = new BasicDBObject();
 
-      for (Entry<String, Class> prop : potProperties.entrySet())
+      for (Entry<String, Class<?>> prop : potProperties.entrySet())
          if (prop.getValue().equals(storeType))
             obj.put(prop.getKey(), getObject(prop.getKey(), toStore));
 
@@ -147,7 +255,22 @@ public class MongoInterface extends DBInterface
       if (refId != null)
          obj.put("ref_id", refId);
 
-      WriteResult res = mongo.getCollection(collection).insert(obj);
+      col.insert(obj);
       return obj.getObjectId("_id");
+   }
+
+   @Override
+   public final void storeMemory(final Memory mem) throws IOException
+   {
+      Map<String, Class<?>> propertyMap = deriveProperties(mem);
+
+      // Store the memory in the memory table
+      ObjectId id = store(Memory.class, mem, propertyMap, null);
+
+      // Work through the other objects - ignore the Memory core stuff
+      Set<Class<?>> allClasses = new HashSet<Class<?>>(propertyMap.values());
+      allClasses.remove(Memory.class);
+      for (Class<?> storeClass : allClasses)
+         store(storeClass, mem, propertyMap, id);
    }
 }

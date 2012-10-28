@@ -1,9 +1,76 @@
 package com.brotherlogic.memory.db;
 
-public class DBFactory
+
+/**
+ * A factory for producing databases
+ * 
+ * @author simon
+ * 
+ */
+public final class DBFactory
 {
+   /**
+    * The mode in which we are running test/prod
+    * 
+    * @author simon
+    * 
+    */
+   public enum Mode
+   {
+      /** Production Mode */
+      PRODUCTION,
+
+      /** Testing Mode */
+      TESTING;
+   }
+
+   /** The singleton interface currently in use */
+   private static DBInterface currInterface = null;
+
+   /** The current mode we're operating in */
+   private static Mode currMode = Mode.PRODUCTION;
+
+   /**
+    * Build the database interface
+    * 
+    * @return a valid functional DBInterface
+    */
    public static DBInterface buildInterface()
    {
-      return new MongoInterface();
+      if (currInterface == null)
+         currInterface = getMongoInterface();
+      return currInterface;
+   }
+
+   /**
+    * Gets a Mongo interface as a DB Interface
+    * 
+    * @return The DBInterface for a mongo representation
+    */
+   private static DBInterface getMongoInterface()
+   {
+      return new MongoInterface(currMode);
+   }
+
+   /**
+    * Set the mode of operation
+    * 
+    * @param newMode
+    *           The new mode to operate in - will cause DB disconnect
+    */
+   public static void setMode(final Mode newMode)
+   {
+      currMode = newMode;
+
+      // Reset the current interfaces
+      currInterface = null;
+   }
+
+   /**
+    * Blocking constructor
+    */
+   private DBFactory()
+   {
+
    }
 }
