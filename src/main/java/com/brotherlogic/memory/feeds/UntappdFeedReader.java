@@ -11,30 +11,37 @@ import org.json.JSONObject;
 
 import com.brotherlogic.memory.core.UntappdMemory;
 
+/**
+ * Feed Reader for Untappd
+ * 
+ * @author simon
+ * 
+ */
 public class UntappdFeedReader extends JSONFeedReader
 {
+   /** Local logger */
    private static Logger logger = Logger
          .getLogger("com.brotherlogic.memory.feeds.UntappdFeedReader");
 
-   public static void main(String[] args) throws Exception
-   {
-      UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
-      System.out.println(reader.gatherObjects(25));
-   }
+   /** The base URL for accessing the feed */
+   private final String baseURL = "http://api.untappd.com/v4";
 
-   String baseURL = "http://api.untappd.com/v4";
+   /** The user name to pull the feed for */
+   private final String username;
 
-   boolean checkedVersion = false;
-
-   String username;
-
-   public UntappdFeedReader(String user)
+   /**
+    * Constructor
+    * 
+    * @param user
+    *           The username to build the feed for
+    */
+   public UntappdFeedReader(final String user)
    {
       username = user;
    }
 
    @Override
-   protected URL getFeedURL(long pagination) throws MalformedURLException
+   protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
       String urlText = baseURL + "/user/checkins/" + username;
 
@@ -49,10 +56,14 @@ public class UntappdFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(String text) throws JSONException
+   protected long processFeedText(final String text) throws JSONException
    {
       JSONObject obj = new JSONObject(text);
-      long nextVal = obj.getJSONObject("response").getJSONObject("pagination").getLong("max_id");
+
+      // Read the next value - max_id is blank when we're done
+      long nextVal = -1;
+      if (obj.getJSONObject("response").getJSONObject("pagination").getString("max_id").length() > 0)
+         nextVal = obj.getJSONObject("response").getJSONObject("pagination").getLong("max_id");
 
       JSONArray arr = obj.getJSONObject("response").getJSONObject("checkins").getJSONArray("items");
       logger.log(Level.INFO, "Read " + arr.length() + " objects");
