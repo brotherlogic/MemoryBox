@@ -39,7 +39,7 @@ public class MongoDBTest extends DBTest
       // Add in a newer Untappd
       UntappdMemory untappd2 = new UntappdMemory();
       untappd2.setImagePath("/blah3");
-      untappd2.setTimestamp(4L);
+      untappd2.setTimestamp(14L);
       untappd2.setBeerName("IPA");
       DBFactory.buildInterface().storeMemory(untappd2);
 
