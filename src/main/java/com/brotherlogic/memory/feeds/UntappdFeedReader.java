@@ -72,7 +72,7 @@ public class UntappdFeedReader extends JSONFeedReader
       {
          UntappdMemory mem = new UntappdMemory();
          mem.buildFromJSON(arr.getJSONObject(i));
-         addObjectToRead(mem);
+         addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
       return nextVal;
    }

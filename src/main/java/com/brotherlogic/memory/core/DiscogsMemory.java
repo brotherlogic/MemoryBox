@@ -8,6 +8,8 @@ package com.brotherlogic.memory.core;
  */
 public class DiscogsMemory extends Memory implements ImageMemory
 {
+   private static int localVersion = 1;
+
    String artist;
 
    String imagePath;
@@ -23,6 +25,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
       return imagePath;
    }
 
+   @Override
+   public int getLocalVersion()
+   {
+      return localVersion;
+   }
+
    public void setArtist(String artist)
    {
       this.artist = artist;
@@ -32,6 +40,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
    public void setImagePath(String path)
    {
       imagePath = path;
+   }
+
+   @Override
+   public void setLocalVersion(Integer localVersion)
+   {
+      this.localVersion = localVersion;
    }
 
 }

@@ -35,22 +35,8 @@ public class MongoInterface extends DBInterface
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
 
-   /** The current mode that the database is running in */
-   private final DBFactory.Mode currMode;
-
    /** The underlying database */
    private DB mongo;
-
-   /**
-    * Constructor
-    * 
-    * @param mode
-    *           The mode to connect in (prod/test)
-    */
-   public MongoInterface(final DBFactory.Mode mode)
-   {
-      currMode = mode;
-   }
 
    /**
     * Clear the database
@@ -77,10 +63,12 @@ public class MongoInterface extends DBInterface
       {
          Mongo m = new Mongo();
 
-         if (currMode == DBFactory.Mode.PRODUCTION)
+         if (DBFactory.getMode() == DBFactory.Mode.PRODUCTION)
             mongo = m.getDB(DB_NAME);
-         else if (currMode == DBFactory.Mode.TESTING)
+         else if (DBFactory.getMode() == DBFactory.Mode.TESTING)
             mongo = m.getDB(DB_NAME_TEST);
+         else
+            throw new IOException("Unknown mode setting: " + DBFactory.getMode());
       }
    }
 
@@ -107,16 +95,19 @@ public class MongoInterface extends DBInterface
 
    }
 
-   private DBCollection getCollection(Class<?> cls) throws IOException
+   protected DBCollection getCollection(Class<?> cls) throws IOException
+   {
+      // Derive the name of the collection
+      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
+      return getCollection(colName);
+   }
+
+   protected DBCollection getCollection(String name) throws IOException
    {
       // Make sure we have a mongo instance up
       connect();
 
-      // Have to init the collection if it doesn't exist
-      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
-      if (!mongo.collectionExists(colName))
-         mongo.createCollection(colName, new BasicDBObject());
-      return mongo.getCollection(colName);
+      return mongo.getCollection(name);
    }
 
    @Override
