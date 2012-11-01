@@ -12,12 +12,16 @@ import java.text.SimpleDateFormat;
  */
 public abstract class Memory implements Comparable<Memory>
 {
-   DateFormat df;
+   /** Used to process dates */
+   private static DateFormat df;
 
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
 
-   int version = 1;
+   /**
+    * Version 2 added the ability to store the underlying representation
+    */
+   int version = 2;
 
    @Override
    public int compareTo(Memory o)
@@ -35,6 +39,8 @@ public abstract class Memory implements Comparable<Memory>
       return other.timestamp.equals(timestamp);
    }
 
+   public abstract int getLocalVersion();
+
    /**
     * Get method for the timestamp
     * 
@@ -47,7 +53,7 @@ public abstract class Memory implements Comparable<Memory>
 
    public int getVersion()
    {
-      return version;
+      return version + getLocalVersion();
    }
 
    @Override
@@ -55,6 +61,8 @@ public abstract class Memory implements Comparable<Memory>
    {
       return timestamp.hashCode();
    }
+
+   public abstract void setLocalVersion(Integer localVersion);
 
    /**
     * Set method for the timestamp

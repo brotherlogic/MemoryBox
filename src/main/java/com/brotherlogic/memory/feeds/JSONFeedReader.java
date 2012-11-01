@@ -113,6 +113,8 @@ public abstract class JSONFeedReader extends FeedReader
    @Override
    public void updateAllMemories() throws IOException
    {
+      logger.log(Level.INFO, "Updating all memories");
+
       updateRequired = true;
       try
       {

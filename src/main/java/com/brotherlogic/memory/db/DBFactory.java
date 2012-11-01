@@ -1,6 +1,5 @@
 package com.brotherlogic.memory.db;
 
-
 /**
  * A factory for producing databases
  * 
@@ -24,11 +23,20 @@ public final class DBFactory
       TESTING;
    }
 
+   private static BaseRepStore baseRepStore = null;
+
    /** The singleton interface currently in use */
    private static DBInterface currInterface = null;
 
    /** The current mode we're operating in */
    private static Mode currMode = Mode.PRODUCTION;
+
+   public static BaseRepStore buildBaseRepStore()
+   {
+      if (baseRepStore == null)
+         baseRepStore = new MongoBaseRepStore(currMode);
+      return baseRepStore;
+   }
 
    /**
     * Build the database interface
@@ -42,6 +50,11 @@ public final class DBFactory
       return currInterface;
    }
 
+   protected static Mode getMode()
+   {
+      return currMode;
+   }
+
    /**
     * Gets a Mongo interface as a DB Interface
     * 
@@ -49,7 +62,7 @@ public final class DBFactory
     */
    private static DBInterface getMongoInterface()
    {
-      return new MongoInterface(currMode);
+      return new MongoInterface();
    }
 
    /**

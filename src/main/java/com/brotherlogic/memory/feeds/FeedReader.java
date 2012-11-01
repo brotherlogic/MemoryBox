@@ -1,6 +1,8 @@
 package com.brotherlogic.memory.feeds;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
@@ -13,6 +15,8 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public abstract class FeedReader
 {
+   private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.FeedReader");
+
    /**
     * Probes the feed - returns the latest memory
     * 
@@ -27,6 +31,10 @@ public abstract class FeedReader
    {
       Memory mem = probeFeed();
       Memory topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
+
+      logger.log(Level.INFO, "Got " + mem + " and " + topDBMem);
+      if (mem != null && topDBMem != null)
+         logger.log(Level.INFO, "Version: " + mem.getVersion() + " and " + topDBMem.getVersion());
 
       // Check on the versions - we may not have got any DB Mems
       if (topDBMem == null || mem.getVersion() != topDBMem.getVersion())
