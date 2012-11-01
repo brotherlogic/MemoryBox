@@ -14,7 +14,9 @@ import org.json.JSONObject;
  */
 public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
-   private static final int VERSION = 1;
+   private static int VERSION = 1;
+
+   String baseRep;
 
    String beerName = "";
 
@@ -28,6 +30,7 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       try
       {
          setTimestamp(obj.getString("created_at"));
+         baseRep = obj.toString();
       }
       catch (ParseException e)
       {
@@ -61,6 +64,12 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
+   public int getLocalVersion()
+   {
+      return VERSION;
+   }
+
+   @Override
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
@@ -75,6 +84,12 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    public void setImagePath(final String filePath)
    {
       imageFile = new File(filePath);
+   }
+
+   @Override
+   public void setLocalVersion(Integer localVersion)
+   {
+      VERSION = localVersion;
    }
 
    @Override
