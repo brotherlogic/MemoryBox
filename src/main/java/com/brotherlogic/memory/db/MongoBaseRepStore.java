@@ -37,7 +37,10 @@ public class MongoBaseRepStore extends BaseRepStore
 
       DBObject cursor = baseCollection.findOne(query);
 
-      return (String) cursor.get("baserep");
+      if (cursor != null)
+         return (String) cursor.get("baserep");
+      else
+         return null;
    }
 
    @Override

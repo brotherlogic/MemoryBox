@@ -17,6 +17,8 @@ public abstract class FeedReader
 {
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.FeedReader");
 
+   public abstract String getUnderlyingRepresentation(Memory mem) throws IOException;
+
    /**
     * Probes the feed - returns the latest memory
     * 
@@ -39,8 +41,16 @@ public abstract class FeedReader
       // Check on the versions - we may not have got any DB Mems
       if (topDBMem == null || mem.getVersion() != topDBMem.getVersion())
          updateAllMemories();
-      else if (mem.getTimestamp() > topDBMem.getTimestamp())
-         updateMemories(topDBMem.getTimestamp());
+      else
+      {
+         // Check on the underlying representations
+         String retBase = getUnderlyingRepresentation(mem);
+         String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);
+         if (!retBase.equals(givenBase))
+            updateAllMemories();
+         else if (mem.getTimestamp() > topDBMem.getTimestamp())
+            updateMemories(topDBMem.getTimestamp());
+      }
    }
 
    /**

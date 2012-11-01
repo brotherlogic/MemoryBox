@@ -9,7 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,12 +25,15 @@ public abstract class JSONFeedReader extends FeedReader
 {
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.JSONFeedReader");
 
+   Map<Memory, String> baseRepCache = new TreeMap<Memory, String>();
+
    private final Stack<JSONConstructable> readObjects = new Stack<JSONConstructable>();
 
    boolean updateRequired = false;
 
-   protected void addObjectToRead(JSONConstructable cons)
+   protected void addObjectToRead(JSONConstructable cons, String rep)
    {
+      baseRepCache.put((Memory) cons, rep);
       readObjects.add(cons);
    }
 
@@ -62,6 +67,14 @@ public abstract class JSONFeedReader extends FeedReader
     * @return The URL for the feed
     */
    protected abstract URL getFeedURL(long pagination) throws MalformedURLException;
+
+   @Override
+   public String getUnderlyingRepresentation(Memory mem) throws IOException
+   {
+      if (baseRepCache.containsKey(mem))
+         return baseRepCache.get(mem);
+      return null;
+   }
 
    protected void noUpdate()
    {
@@ -120,7 +133,12 @@ public abstract class JSONFeedReader extends FeedReader
       {
          Collection<JSONConstructable> objects = gatherObjects(Integer.MAX_VALUE);
          for (JSONConstructable obj : objects)
-            DBFactory.buildInterface().storeMemory((Memory) obj);
+         {
+            // Store the memory and the underlying representation
+            Memory mem = (Memory) obj;
+            DBFactory.buildInterface().storeMemory(mem);
+            DBFactory.buildBaseRepStore().storeBaseRep(mem, getUnderlyingRepresentation(mem));
+         }
       }
       catch (JSONException e)
       {
