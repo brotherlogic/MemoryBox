@@ -20,14 +20,9 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    /** The path to the image */
    private File imageFile = new File("");
 
-   /** The local version number */
-   private int version = 1;
-
    @Override
-   public int buildFromJSON(final JSONObject obj) throws JSONException
+   public void buildFromJSON(final JSONObject obj) throws JSONException
    {
-      int lversion = super.getVersion();
-
       try
       {
          setTimestamp(obj.getString("created_at"));
@@ -36,7 +31,6 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       {
          System.err.println("Cannot parse: " + obj.getString("created_at"));
       }
-      return lversion + version;
    }
 
    @Override
@@ -69,12 +63,6 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
-   public int getLocalVersion()
-   {
-      return version;
-   }
-
-   @Override
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
@@ -95,12 +83,6 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    public void setImagePath(final String filePath)
    {
       imageFile = new File(filePath);
-   }
-
-   @Override
-   public void setLocalVersion(final Integer localVersion)
-   {
-      version = localVersion;
    }
 
    @Override

@@ -1,10 +1,13 @@
 package com.brotherlogic.memory.db;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import com.brotherlogic.memory.core.Memory;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 /**
@@ -48,6 +51,22 @@ public class MongoBaseRepStore extends BaseRepStore
          return (String) cursor.get("baserep");
       else
          return null;
+   }
+
+   @Override
+   public Collection<String> getBaseRep(final String className) throws IOException
+   {
+      connect();
+
+      BasicDBObject query = new BasicDBObject();
+      query.put("memtype", className);
+
+      Collection<String> bases = new LinkedList<String>();
+      DBCursor cursor = baseCollection.find(query);
+      while (cursor.hasNext())
+         bases.add((String) cursor.next().get("baserep"));
+
+      return bases;
    }
 
    @Override

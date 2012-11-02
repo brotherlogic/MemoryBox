@@ -53,10 +53,22 @@ public abstract class JSONFeedReader extends FeedReader
    }
 
    /**
+    * Builds a memory given a stub of JSON
+    * 
+    * @param json
+    *           The String JSON representation
+    * @return The resultant memory
+    * @throws JSONException
+    *            if we can't parse the JSON
+    */
+   protected abstract Memory buildMemory(final String json) throws JSONException;
+
+   /**
     * Builds up a number of objects
     * 
     * @param number
     *           The number of objects to read
+    * 
     * @return A collection of read objects
     * @throws IOException
     *            If something goes wrong with reading
@@ -84,6 +96,13 @@ public abstract class JSONFeedReader extends FeedReader
 
       return objects;
    }
+
+   /**
+    * Gets the class name of the object we're building
+    * 
+    * @return The String name of the class we're building in this reader
+    */
+   protected abstract String getClassName();
 
    /**
     * Gets the URL for the given feed - pagination if necessary (ignored if < 0)
@@ -165,24 +184,38 @@ public abstract class JSONFeedReader extends FeedReader
          readText.append(line);
       reader.close();
 
-      logger.log(Level.INFO, "Got " + readText);
       return readText.toString();
    }
 
    @Override
-   public void updateAllMemories() throws IOException
+   public void updateAllMemories(final boolean updateUnderlying) throws IOException
    {
-      logger.log(Level.INFO, "Updating all memories");
+      logger.log(Level.INFO, "Updating all memories - checking the underlying stuff here: "
+            + updateUnderlying);
 
       try
       {
-         Collection<JSONConstructable> objects = gatherObjects(Integer.MAX_VALUE);
-         for (JSONConstructable obj : objects)
+         if (updateUnderlying)
          {
-            // Store the memory and the underlying representation
-            Memory mem = (Memory) obj;
-            DBFactory.buildInterface().storeMemory(mem);
-            DBFactory.buildBaseRepStore().storeBaseRep(mem, getUnderlyingRepresentation(mem));
+            Collection<JSONConstructable> objects = gatherObjects(Integer.MAX_VALUE);
+            for (JSONConstructable obj : objects)
+            {
+               // Store the memory and the underlying representation
+               Memory mem = (Memory) obj;
+               DBFactory.buildInterface().storeMemory(mem);
+               DBFactory.buildBaseRepStore().storeBaseRep(mem, getUnderlyingRepresentation(mem));
+            }
+         }
+         else
+         {
+            // Get all the data from the underlying representations
+            Collection<String> underlyingReps = DBFactory.buildBaseRepStore().getBaseRep(
+                  getClassName());
+            for (String jsonString : underlyingReps)
+            {
+               Memory mem = buildMemory(jsonString);
+               DBFactory.buildInterface().storeMemory(mem);
+            }
          }
       }
       catch (JSONException e)
