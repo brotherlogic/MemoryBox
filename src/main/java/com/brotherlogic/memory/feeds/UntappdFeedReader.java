@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.core.UntappdMemory;
 
 /**
@@ -38,6 +39,20 @@ public class UntappdFeedReader extends JSONFeedReader
    public UntappdFeedReader(final String user)
    {
       username = user;
+   }
+
+   @Override
+   protected Memory buildMemory(final String json) throws JSONException
+   {
+      UntappdMemory mem = new UntappdMemory();
+      mem.buildFromJSON(new JSONObject(json));
+      return mem;
+   }
+
+   @Override
+   protected final String getClassName()
+   {
+      return UntappdMemory.class.getName();
    }
 
    @Override

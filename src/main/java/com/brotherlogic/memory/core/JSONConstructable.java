@@ -16,9 +16,8 @@ public interface JSONConstructable
     * 
     * @param obj
     *           The object to build from
-    * @return the version number of the resultant object
     * @throws JSONException
     *            If the JSON can't be parsed
     */
-   int buildFromJSON(final JSONObject obj) throws JSONException;
+   void buildFromJSON(final JSONObject obj) throws JSONException;
 }
