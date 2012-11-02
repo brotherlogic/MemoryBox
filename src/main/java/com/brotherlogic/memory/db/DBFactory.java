@@ -23,6 +23,7 @@ public final class DBFactory
       TESTING;
    }
 
+   /** The base rep store we're using */
    private static BaseRepStore baseRepStore = null;
 
    /** The singleton interface currently in use */
@@ -31,10 +32,15 @@ public final class DBFactory
    /** The current mode we're operating in */
    private static Mode currMode = Mode.PRODUCTION;
 
+   /**
+    * Builds the base rep store
+    * 
+    * @return a valid base rep store for the sytem
+    */
    public static BaseRepStore buildBaseRepStore()
    {
       if (baseRepStore == null)
-         baseRepStore = new MongoBaseRepStore(currMode);
+         baseRepStore = new MongoBaseRepStore();
       return baseRepStore;
    }
 
@@ -50,6 +56,11 @@ public final class DBFactory
       return currInterface;
    }
 
+   /**
+    * Gets the DB Mode we're currently working in
+    * 
+    * @return The Mode of operation
+    */
    protected static Mode getMode()
    {
       return currMode;

@@ -7,11 +7,21 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Config
+/**
+ * Generic config clas
+ * 
+ * @author simon
+ * 
+ */
+public final class Config
 {
+   /** Config keystore */
    private static Map<String, String> configMap = null;
 
-   private static void buildConfig()
+   /**
+    * Builds up the config file
+    */
+   private static synchronized void buildConfig()
    {
       if (configMap == null)
       {
@@ -34,9 +44,24 @@ public class Config
       }
    }
 
-   public static String getParameter(String key)
+   /**
+    * Gets a parameter from the config store
+    * 
+    * @param key
+    *           The key
+    * @return The value corresponding to the key or null
+    */
+   public static String getParameter(final String key)
    {
       buildConfig();
       return configMap.get(key);
+   }
+
+   /**
+    * Blocking constructor
+    */
+   private Config()
+   {
+
    }
 }

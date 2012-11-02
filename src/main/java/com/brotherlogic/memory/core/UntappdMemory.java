@@ -14,29 +14,29 @@ import org.json.JSONObject;
  */
 public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
-   private static int VERSION = 1;
+   /** The name of the beer */
+   private String beerName = "";
 
-   String baseRep;
+   /** The path to the image */
+   private File imageFile = new File("");
 
-   String beerName = "";
-
-   File imageFile = new File("");
+   /** The local version number */
+   private int version = 1;
 
    @Override
-   public int buildFromJSON(JSONObject obj) throws JSONException
+   public int buildFromJSON(final JSONObject obj) throws JSONException
    {
-      int version = super.getVersion();
+      int lversion = super.getVersion();
 
       try
       {
          setTimestamp(obj.getString("created_at"));
-         baseRep = obj.toString();
       }
       catch (ParseException e)
       {
          System.err.println("Cannot parse: " + obj.getString("created_at"));
       }
-      return version + VERSION;
+      return lversion + version;
    }
 
    @Override
@@ -52,6 +52,11 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return super.equals(o);
    }
 
+   /**
+    * Get method for beer name
+    * 
+    * @return the name of the beer
+    */
    public String getBeerName()
    {
       return beerName;
@@ -66,7 +71,7 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    @Override
    public int getLocalVersion()
    {
-      return VERSION;
+      return version;
    }
 
    @Override
@@ -75,9 +80,15 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return super.hashCode() + imageFile.hashCode();
    }
 
-   public void setBeerName(String beerName)
+   /**
+    * Set method for the beer name
+    * 
+    * @param name
+    *           The name of the beer
+    */
+   public void setBeerName(final String name)
    {
-      this.beerName = beerName;
+      this.beerName = name;
    }
 
    @Override
@@ -87,9 +98,9 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
-   public void setLocalVersion(Integer localVersion)
+   public void setLocalVersion(final Integer localVersion)
    {
-      VERSION = localVersion;
+      version = localVersion;
    }
 
    @Override

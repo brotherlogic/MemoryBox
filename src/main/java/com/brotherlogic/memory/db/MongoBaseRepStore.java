@@ -7,16 +7,23 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
+/**
+ * Mongo table for storing the base reps of the objects
+ * 
+ * @author simon
+ * 
+ */
 public class MongoBaseRepStore extends BaseRepStore
 {
+   /** The collection where the base rep is stored */
    private DBCollection baseCollection;
-   private DBFactory.Mode mode;
 
-   public MongoBaseRepStore(DBFactory.Mode mode)
-   {
-
-   }
-
+   /**
+    * Connect to the database
+    * 
+    * @throws IOException
+    *            If we can't reach the database
+    */
    private void connect() throws IOException
    {
       if (baseCollection == null)
@@ -27,7 +34,7 @@ public class MongoBaseRepStore extends BaseRepStore
    }
 
    @Override
-   public String getBaseRep(Memory mem) throws IOException
+   public String getBaseRep(final Memory mem) throws IOException
    {
       connect();
 
@@ -44,7 +51,7 @@ public class MongoBaseRepStore extends BaseRepStore
    }
 
    @Override
-   public void storeBaseRep(Memory mem, String baseRep) throws IOException
+   public void storeBaseRep(final Memory mem, final String baseRep) throws IOException
    {
       connect();
 

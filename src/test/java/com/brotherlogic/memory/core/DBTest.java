@@ -7,6 +7,12 @@ import org.junit.Before;
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DBFactory.Mode;
 
+/**
+ * Tests the DB functionality
+ * 
+ * @author simon
+ * 
+ */
 public class DBTest
 {
    /**
