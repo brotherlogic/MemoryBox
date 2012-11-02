@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 public abstract class Memory implements Comparable<Memory>
 {
    /** Used to process dates */
-   private static DateFormat df;
+   private DateFormat df;
 
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
@@ -21,10 +21,10 @@ public abstract class Memory implements Comparable<Memory>
    /**
     * Version 2 added the ability to store the underlying representation
     */
-   int version = 2;
+   private final int version = 2;
 
    @Override
-   public int compareTo(Memory o)
+   public int compareTo(final Memory o)
    {
       return timestamp.compareTo(o.timestamp);
    }
@@ -39,6 +39,11 @@ public abstract class Memory implements Comparable<Memory>
       return other.timestamp.equals(timestamp);
    }
 
+   /**
+    * Get the local version of this memory
+    * 
+    * @return the version number for the concrete memory
+    */
    public abstract int getLocalVersion();
 
    /**
@@ -51,6 +56,11 @@ public abstract class Memory implements Comparable<Memory>
       return timestamp;
    }
 
+   /**
+    * Get the version of this memory
+    * 
+    * @return The version number of this memmory
+    */
    public int getVersion()
    {
       return version + getLocalVersion();
@@ -62,6 +72,12 @@ public abstract class Memory implements Comparable<Memory>
       return timestamp.hashCode();
    }
 
+   /**
+    * Set the local version number
+    * 
+    * @param localVersion
+    *           The number to set
+    */
    public abstract void setLocalVersion(Integer localVersion);
 
    /**
@@ -75,7 +91,15 @@ public abstract class Memory implements Comparable<Memory>
       timestamp = value;
    }
 
-   public void setTimestamp(String value) throws ParseException
+   /**
+    * Set method for the timestamp
+    * 
+    * @param value
+    *           The string to parse
+    * @throws ParseException
+    *            If we can't parse the date
+    */
+   public void setTimestamp(final String value) throws ParseException
    {
       if (df == null)
          df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");

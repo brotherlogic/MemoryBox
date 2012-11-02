@@ -18,6 +18,7 @@ import com.brotherlogic.memory.core.Memory;
  */
 public abstract class DBInterface
 {
+   /** The logger to display output */
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DBInterface");
 
    /**
@@ -117,6 +118,8 @@ public abstract class DBInterface
     * @param cls
     *           The class type of memory to retrieve from
     * @return The latest memory we have stored
+    * @throws IOException
+    *            if something goes wrong with retrieval
     */
    public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
 
