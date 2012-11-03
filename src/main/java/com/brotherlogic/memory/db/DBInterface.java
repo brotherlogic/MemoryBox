@@ -3,6 +3,8 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -122,6 +124,9 @@ public abstract class DBInterface
     *            if something goes wrong with retrieval
     */
    public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
+
+   public abstract Collection<Memory> retrieveMemories(Calendar day, String className)
+         throws IOException;
 
    /**
     * Retrieve a memory from the database
