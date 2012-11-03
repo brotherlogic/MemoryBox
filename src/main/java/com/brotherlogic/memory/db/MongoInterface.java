@@ -202,6 +202,24 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
+   public Collection<Memory> retrieveMemories(Class cls) throws IOException
+   {
+      Collection<Memory> mems = new LinkedList<Memory>();
+      DBCollection col = getCollection(Memory.class);
+      DBObject query = new BasicDBObject();
+      query.put("memoryClass", cls.getName());
+      DBCursor cursor = col.find();
+      while (cursor.hasNext())
+      {
+         DBObject obj = cursor.next();
+         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+      }
+      cursor.close();
+
+      return mems;
+   }
+
+   @Override
    public final Memory retrieveMemory(final long timestamp, final String className)
          throws IOException
    {
@@ -307,8 +325,30 @@ public class MongoInterface extends DBInterface
       if (refId != null)
          obj.put("ref_id", refId);
 
-      col.insert(obj);
-      return obj.getObjectId("_id");
+      // If this is the base class - check that we're not already added
+      if (refId == null)
+      {
+         DBObject storedObj = col.findOne(obj);
+         if (storedObj != null)
+            return (ObjectId) storedObj.get("_id");
+         else
+         {
+            col.insert(obj);
+            return obj.getObjectId("_id");
+         }
+      }
+      else
+      {
+         // Check that this referenced object isn't already stored
+         DBObject refQ = new BasicDBObject();
+         refQ.put("ref_id", refId);
+         DBObject storedObj = col.findOne(refQ);
+         if (storedObj != null)
+            col.update(refQ, obj);
+         else
+            col.insert(obj);
+         return obj.getObjectId("_id");
+      }
    }
 
    @Override
