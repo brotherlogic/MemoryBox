@@ -8,10 +8,17 @@ package com.brotherlogic.memory.core;
  */
 public class DiscogsMemory extends Memory implements ImageMemory
 {
-   String artist;
+   /** The name of the artist */
+   private String artist;
 
-   String imagePath;
+   /** The path to the given image file */
+   private String imagePath;
 
+   /**
+    * Get method for artist
+    * 
+    * @return The name of the artist
+    */
    public String getArtist()
    {
       return artist;
@@ -23,15 +30,20 @@ public class DiscogsMemory extends Memory implements ImageMemory
       return imagePath;
    }
 
-   public void setArtist(String artist)
+   /**
+    * Set method for artist
+    * 
+    * @param artistIn
+    *           The name of the artist
+    */
+   public void setArtist(final String artistIn)
    {
-      this.artist = artist;
+      this.artist = artistIn;
    }
 
    @Override
-   public void setImagePath(String path)
+   public void setImagePath(final String path)
    {
       imagePath = path;
    }
-
 }

@@ -9,36 +9,78 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.brotherlogic.memory.core.JSONConstructable;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * JSON based feed reader
+ * 
+ * @author simon
+ * 
+ */
 public abstract class JSONFeedReader extends FeedReader
 {
+   /** The logger we'll use for printing stuff out */
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.JSONFeedReader");
 
-   private final Stack<JSONConstructable> readObjects = new Stack<JSONConstructable>();
+   /** Local cache of base reps for memories */
+   private final Map<Memory, String> baseRepCache = new TreeMap<Memory, String>();
 
-   boolean updateRequired = false;
+   /** The objects we've read so far */
+   private final Stack<Memory> readObjects = new Stack<Memory>();
 
-   protected void addObjectToRead(JSONConstructable cons)
+   /**
+    * Adds an object to the read queue
+    * 
+    * @param cons
+    *           The constructable memory
+    * @param rep
+    *           The base rep of this memory
+    */
+   protected void addObjectToRead(final Memory cons, final String rep)
    {
+      baseRepCache.put(cons, rep);
       readObjects.add(cons);
    }
 
-   protected Collection<JSONConstructable> gatherObjects(int number) throws IOException,
-         JSONException
+   /**
+    * Builds a memory given a stub of JSON
+    * 
+    * @param json
+    *           The String JSON representation
+    * @return The resultant memory
+    * @throws JSONException
+    *            if we can't parse the JSON
+    */
+   protected abstract Memory buildMemory(final JSONObject json) throws JSONException;
+
+   /**
+    * Builds up a number of objects
+    * 
+    * @param number
+    *           The number of objects to read
+    * 
+    * @return A collection of read objects
+    * @throws IOException
+    *            If something goes wrong with reading
+    * @throws JSONException
+    *            If we can't parse the JSON
+    */
+   protected Collection<Memory> gatherObjects(final int number) throws IOException, JSONException
    {
-      List<JSONConstructable> objects = new LinkedList<JSONConstructable>();
+      List<Memory> objects = new LinkedList<Memory>();
 
       long pagination = -1;
-      while (objects.size() < number || updateRequired)
+      while (objects.size() < number)
       {
          // Pull the feed and build the objects
          String feedText = read(getFeedURL(pagination));
@@ -55,22 +97,39 @@ public abstract class JSONFeedReader extends FeedReader
    }
 
    /**
+    * Gets the class name of the object we're building
+    * 
+    * @return The String name of the class we're building in this reader
+    */
+   protected abstract String getClassName();
+
+   /**
     * Gets the URL for the given feed - pagination if necessary (ignored if < 0)
     * 
     * @param pagination
     *           The page/value to paginate
     * @return The URL for the feed
+    * @throws MalformedURLException
+    *            if we can't parse the URL
     */
    protected abstract URL getFeedURL(long pagination) throws MalformedURLException;
 
-   protected void noUpdate()
+   @Override
+   public String getUnderlyingRepresentation(final Memory mem) throws IOException
    {
-      updateRequired = false;
+      if (baseRepCache.containsKey(mem))
+         return baseRepCache.get(mem);
+      return null;
    }
 
-   private Collection<JSONConstructable> popReadObjects()
+   /**
+    * Pop off the read objects into a collection
+    * 
+    * @return a {@link Collection} of {@link JSONConstructable} objects
+    */
+   private Collection<Memory> popReadObjects()
    {
-      List<JSONConstructable> consList = new LinkedList<JSONConstructable>();
+      List<Memory> consList = new LinkedList<Memory>();
       while (readObjects.size() > 0)
          consList.add(readObjects.pop());
       return consList;
@@ -81,10 +140,10 @@ public abstract class JSONFeedReader extends FeedReader
    {
       try
       {
-         Collection<JSONConstructable> cons = gatherObjects(1);
+         Collection<Memory> cons = gatherObjects(1);
          List<Memory> memorys = new LinkedList<Memory>();
-         for (JSONConstructable con : cons)
-            memorys.add((Memory) con);
+         for (Memory con : cons)
+            memorys.add(con);
          Collections.sort(memorys);
          return memorys.get(0);
       }
@@ -94,9 +153,27 @@ public abstract class JSONFeedReader extends FeedReader
       }
    }
 
+   /**
+    * Process the feed text and turn it into objects
+    * 
+    * @param text
+    *           the text to convert
+    * @return The next page number to retrieve from
+    * @throws JSONException
+    *            if we can't parse the text
+    */
    protected abstract long processFeedText(String text) throws JSONException;
 
-   private String read(URL urlToRead) throws IOException
+   /**
+    * Read a URL and turn into text
+    * 
+    * @param urlToRead
+    *           The URL to read
+    * @return The text read from the URL
+    * @throws IOException
+    *            if we can't reach the URL
+    */
+   private String read(final URL urlToRead) throws IOException
    {
       logger.log(Level.INFO, "Reading " + urlToRead);
       StringBuffer readText = new StringBuffer();
@@ -106,19 +183,39 @@ public abstract class JSONFeedReader extends FeedReader
          readText.append(line);
       reader.close();
 
-      logger.log(Level.INFO, "Got " + readText);
       return readText.toString();
    }
 
    @Override
-   public void updateAllMemories() throws IOException
+   public void updateAllMemories(final boolean updateUnderlying) throws IOException
    {
-      updateRequired = true;
+      logger.log(Level.INFO, "Updating all memories - checking the underlying stuff here: "
+            + updateUnderlying);
+
       try
       {
-         Collection<JSONConstructable> objects = gatherObjects(Integer.MAX_VALUE);
-         for (JSONConstructable obj : objects)
-            DBFactory.buildInterface().storeMemory((Memory) obj);
+         if (updateUnderlying)
+         {
+            Collection<Memory> objects = gatherObjects(Integer.MAX_VALUE);
+            for (Memory obj : objects)
+            {
+               // Store the memory and the underlying representation
+               Memory mem = obj;
+               DBFactory.buildInterface().storeMemory(mem);
+               DBFactory.buildBaseRepStore().storeBaseRep(mem, getUnderlyingRepresentation(mem));
+            }
+         }
+         else
+         {
+            // Get all the data from the underlying representations
+            Collection<String> underlyingReps = DBFactory.buildBaseRepStore().getBaseRep(
+                  getClassName());
+            for (String jsonString : underlyingReps)
+            {
+               Memory mem = buildMemory(new JSONObject(jsonString));
+               DBFactory.buildInterface().storeMemory(mem);
+            }
+         }
       }
       catch (JSONException e)
       {
@@ -127,11 +224,11 @@ public abstract class JSONFeedReader extends FeedReader
    }
 
    @Override
-   public void updateMemories(long timestamp) throws IOException
+   public void updateMemories(final long timestamp) throws IOException
    {
       try
       {
-         List<JSONConstructable> objects = new LinkedList<JSONConstructable>();
+         List<Memory> objects = new LinkedList<Memory>();
 
          long pagination = -1;
          boolean timestampOver = false;
@@ -140,8 +237,8 @@ public abstract class JSONFeedReader extends FeedReader
             // Pull the feed and build the objects
             String feedText = read(getFeedURL(pagination));
             long nextPage = processFeedText(feedText);
-            for (JSONConstructable obj : popReadObjects())
-               if (((Memory) obj).getTimestamp() > timestamp)
+            for (Memory obj : popReadObjects())
+               if ((obj).getTimestamp() > timestamp)
                   objects.add(obj);
                else
                   timestampOver = true;
@@ -153,9 +250,9 @@ public abstract class JSONFeedReader extends FeedReader
          }
 
          // Update all the objects
-         for (JSONConstructable obj : objects)
+         for (Memory obj : objects)
          {
-            Memory m = (Memory) obj;
+            Memory m = obj;
             DBFactory.buildInterface().storeMemory(m);
          }
       }

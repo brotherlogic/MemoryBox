@@ -3,10 +3,15 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 
@@ -35,22 +40,10 @@ public class MongoInterface extends DBInterface
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
 
-   /** The current mode that the database is running in */
-   private final DBFactory.Mode currMode;
+   private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoInterface");
 
    /** The underlying database */
    private DB mongo;
-
-   /**
-    * Constructor
-    * 
-    * @param mode
-    *           The mode to connect in (prod/test)
-    */
-   public MongoInterface(final DBFactory.Mode mode)
-   {
-      currMode = mode;
-   }
 
    /**
     * Clear the database
@@ -77,10 +70,12 @@ public class MongoInterface extends DBInterface
       {
          Mongo m = new Mongo();
 
-         if (currMode == DBFactory.Mode.PRODUCTION)
+         if (DBFactory.getMode() == DBFactory.Mode.PRODUCTION)
             mongo = m.getDB(DB_NAME);
-         else if (currMode == DBFactory.Mode.TESTING)
+         else if (DBFactory.getMode() == DBFactory.Mode.TESTING)
             mongo = m.getDB(DB_NAME_TEST);
+         else
+            throw new IOException("Unknown mode setting: " + DBFactory.getMode());
       }
    }
 
@@ -107,26 +102,47 @@ public class MongoInterface extends DBInterface
 
    }
 
-   private DBCollection getCollection(Class<?> cls) throws IOException
+   /**
+    * Gets the collection for a given class
+    * 
+    * @param cls
+    *           The class to get the collection
+    * @return a valid mongo collection for this class
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   protected DBCollection getCollection(final Class<?> cls) throws IOException
+   {
+      // Derive the name of the collection
+      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
+      return getCollection(colName);
+   }
+
+   /**
+    * Gets a collection with a given name
+    * 
+    * @param name
+    *           The String name for this collection
+    * @return A valid Mongo collection for this given name
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   protected DBCollection getCollection(final String name) throws IOException
    {
       // Make sure we have a mongo instance up
       connect();
 
-      // Have to init the collection if it doesn't exist
-      String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
-      if (!mongo.collectionExists(colName))
-         mongo.createCollection(colName, new BasicDBObject());
-      return mongo.getCollection(colName);
+      return mongo.getCollection(name);
    }
 
    @Override
    public DownloadQueue getDownloadQueue()
    {
-      return null;
+      return new MongoDownloadQueue();
    }
 
    @Override
-   public Memory retrieveLatestMemory(Class<?> cls) throws IOException
+   public Memory retrieveLatestMemory(final Class<?> cls) throws IOException
    {
       // Have to work our way through the memories to find the first match; -1
       // means descending order
@@ -150,6 +166,39 @@ public class MongoInterface extends DBInterface
       }
 
       return null;
+   }
+
+   @Override
+   public Collection<Memory> retrieveMemories(Calendar day, String className) throws IOException
+   {
+      Collection<Memory> mems = new LinkedList<Memory>();
+
+      DBCollection col = getCollection(Memory.class);
+      Calendar query = Calendar.getInstance();
+      query.setTimeInMillis(day.getTimeInMillis());
+      query.set(Calendar.HOUR, 0);
+      query.set(Calendar.MINUTE, 0);
+      query.set(Calendar.SECOND, 0);
+
+      long qStart = query.getTimeInMillis();
+      query.add(Calendar.DAY_OF_YEAR, 1);
+      long qEnd = query.getTimeInMillis();
+
+      DBObject dbquery = new BasicDBObject();
+      DBObject filter = new BasicDBObject();
+      filter.put("$gt", qStart);
+      filter.put("$lt", qEnd);
+      dbquery.put("timestamp", filter);
+
+      DBCursor res = col.find(dbquery);
+      while (res.hasNext())
+      {
+         DBObject obj = res.next();
+         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
+      }
+      res.close();
+
+      return mems;
    }
 
    @Override
@@ -214,14 +263,17 @@ public class MongoInterface extends DBInterface
    private void setProperties(final Class<?> cls, final Memory obj,
          final Map<String, Class<?>> properties, final ObjectId refId) throws IOException
    {
+      logger.log(Level.INFO, "Setting properties " + cls + " given " + obj + " and " + refId);
+
       BasicDBObject query = new BasicDBObject();
       query.put(REF_NAME, refId);
       DBObject retObj = getCollection(cls).findOne(query);
 
       // Match up these properties
-      for (Entry<String, Class<?>> propEntry : properties.entrySet())
-         if (propEntry.getValue().equals(cls))
-            setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
+      if (retObj != null)
+         for (Entry<String, Class<?>> propEntry : properties.entrySet())
+            if (propEntry.getValue().equals(cls))
+               setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
    }
 
    /**

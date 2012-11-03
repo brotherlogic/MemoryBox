@@ -3,8 +3,12 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Memory;
 
@@ -16,6 +20,9 @@ import com.brotherlogic.memory.core.Memory;
  */
 public abstract class DBInterface
 {
+   /** The logger to display output */
+   private static Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DBInterface");
+
    /**
     * Wipes the database
     * 
@@ -113,8 +120,13 @@ public abstract class DBInterface
     * @param cls
     *           The class type of memory to retrieve from
     * @return The latest memory we have stored
+    * @throws IOException
+    *            if something goes wrong with retrieval
     */
    public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
+
+   public abstract Collection<Memory> retrieveMemories(Calendar day, String className)
+         throws IOException;
 
    /**
     * Retrieve a memory from the database
@@ -144,6 +156,12 @@ public abstract class DBInterface
    protected final void setProperty(final Memory obj, final String propName, final Object value)
          throws IOException
    {
+      logger.log(Level.INFO, "Logging " + obj + " given " + propName + " and " + value);
+
+      // Do nothing if we don't have a valid value to work with
+      if (value == null)
+         return;
+
       try
       {
          Method setMethod = obj.getClass().getMethod(
