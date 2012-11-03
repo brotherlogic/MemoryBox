@@ -2,6 +2,7 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +12,7 @@ import org.json.JSONObject;
 
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.core.UntappdMemory;
+import com.brotherlogic.memory.db.DBFactory;
 
 /**
  * Feed Reader for Untappd
@@ -42,10 +44,35 @@ public class UntappdFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected Memory buildMemory(final String json) throws JSONException
+   protected Memory buildMemory(final JSONObject json) throws JSONException
    {
       UntappdMemory mem = new UntappdMemory();
-      mem.buildFromJSON(new JSONObject(json));
+      try
+      {
+         mem.setTimestamp(json.getString("created_at"));
+         mem.setBeerName(json.getJSONObject("beer").getString("beer_name"));
+
+         // Get the largest image file that this references
+         if (json.getJSONObject("media").getJSONArray("items").length() > 0)
+         {
+            String largeURL = json.getJSONObject("media").getJSONArray("items").getJSONObject(0)
+                  .getJSONObject("photo").getString("photo_img_og");
+            mem.setImagePath(DBFactory.buildInterface().getDownloadQueue()
+                  .download(new URL(largeURL)));
+         }
+         else
+            mem.setImagePath("NONE");
+      }
+      catch (ParseException e)
+      {
+         System.err.println("Cannot parse: " + json.getString("created_at"));
+      }
+      catch (MalformedURLException e)
+      {
+         System.err.println("Cannot urlise: "
+               + json.getJSONObject("media").getJSONObject("photo").getString("photo_img_og"));
+      }
+
       return mem;
    }
 
@@ -85,8 +112,7 @@ public class UntappdFeedReader extends JSONFeedReader
 
       for (int i = 0; i < arr.length(); i++)
       {
-         UntappdMemory mem = new UntappdMemory();
-         mem.buildFromJSON(arr.getJSONObject(i));
+         Memory mem = buildMemory(arr.getJSONObject(i));
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
       return nextVal;
