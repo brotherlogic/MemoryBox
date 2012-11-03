@@ -7,8 +7,20 @@ import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * Class to test our link with Mongo
+ * 
+ * @author simon
+ * 
+ */
 public class MongoDBTest extends DBTest
 {
+   /**
+    * Test to see if we can get the latest memory correctly
+    * 
+    * @throws IOException
+    *            if DB link goes wrong
+    */
    @Test
    public void testGetLatestMemory() throws IOException
    {

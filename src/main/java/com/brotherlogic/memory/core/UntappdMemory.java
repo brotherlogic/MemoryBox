@@ -14,29 +14,23 @@ import org.json.JSONObject;
  */
 public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
 {
-   private static int VERSION = 1;
+   /** The name of the beer */
+   private String beerName = "";
 
-   String baseRep;
-
-   String beerName = "";
-
-   File imageFile = new File("");
+   /** The path to the image */
+   private File imageFile = new File("");
 
    @Override
-   public int buildFromJSON(JSONObject obj) throws JSONException
+   public void buildFromJSON(final JSONObject obj) throws JSONException
    {
-      int version = super.getVersion();
-
       try
       {
          setTimestamp(obj.getString("created_at"));
-         baseRep = obj.toString();
       }
       catch (ParseException e)
       {
          System.err.println("Cannot parse: " + obj.getString("created_at"));
       }
-      return version + VERSION;
    }
 
    @Override
@@ -52,6 +46,11 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return super.equals(o);
    }
 
+   /**
+    * Get method for beer name
+    * 
+    * @return the name of the beer
+    */
    public String getBeerName()
    {
       return beerName;
@@ -64,32 +63,26 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
-   public int getLocalVersion()
-   {
-      return VERSION;
-   }
-
-   @Override
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
    }
 
-   public void setBeerName(String beerName)
+   /**
+    * Set method for the beer name
+    * 
+    * @param name
+    *           The name of the beer
+    */
+   public void setBeerName(final String name)
    {
-      this.beerName = beerName;
+      this.beerName = name;
    }
 
    @Override
    public void setImagePath(final String filePath)
    {
       imageFile = new File(filePath);
-   }
-
-   @Override
-   public void setLocalVersion(Integer localVersion)
-   {
-      VERSION = localVersion;
    }
 
    @Override

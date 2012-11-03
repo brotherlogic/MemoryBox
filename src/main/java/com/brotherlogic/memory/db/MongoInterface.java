@@ -95,14 +95,32 @@ public class MongoInterface extends DBInterface
 
    }
 
-   protected DBCollection getCollection(Class<?> cls) throws IOException
+   /**
+    * Gets the collection for a given class
+    * 
+    * @param cls
+    *           The class to get the collection
+    * @return a valid mongo collection for this class
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   protected DBCollection getCollection(final Class<?> cls) throws IOException
    {
       // Derive the name of the collection
       String colName = cls.getName().substring("com.brotherlogic.memory.core".length() + 1);
       return getCollection(colName);
    }
 
-   protected DBCollection getCollection(String name) throws IOException
+   /**
+    * Gets a collection with a given name
+    * 
+    * @param name
+    *           The String name for this collection
+    * @return A valid Mongo collection for this given name
+    * @throws IOException
+    *            If we can't reach the database
+    */
+   protected DBCollection getCollection(final String name) throws IOException
    {
       // Make sure we have a mongo instance up
       connect();
@@ -117,7 +135,7 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public Memory retrieveLatestMemory(Class<?> cls) throws IOException
+   public Memory retrieveLatestMemory(final Class<?> cls) throws IOException
    {
       // Have to work our way through the memories to find the first match; -1
       // means descending order

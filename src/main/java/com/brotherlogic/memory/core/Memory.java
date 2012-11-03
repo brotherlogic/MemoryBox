@@ -1,5 +1,7 @@
 package com.brotherlogic.memory.core;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,18 +15,13 @@ import java.text.SimpleDateFormat;
 public abstract class Memory implements Comparable<Memory>
 {
    /** Used to process dates */
-   private static DateFormat df;
+   private DateFormat df;
 
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
 
-   /**
-    * Version 2 added the ability to store the underlying representation
-    */
-   int version = 2;
-
    @Override
-   public int compareTo(Memory o)
+   public int compareTo(final Memory o)
    {
       return timestamp.compareTo(o.timestamp);
    }
@@ -39,7 +36,15 @@ public abstract class Memory implements Comparable<Memory>
       return other.timestamp.equals(timestamp);
    }
 
-   public abstract int getLocalVersion();
+   /**
+    * Get method for the memory class
+    * 
+    * @return The name of this class
+    */
+   public String getMemoryClass()
+   {
+      return this.getClass().getName();
+   }
 
    /**
     * Get method for the timestamp
@@ -51,18 +56,45 @@ public abstract class Memory implements Comparable<Memory>
       return timestamp;
    }
 
-   public int getVersion()
-   {
-      return version + getLocalVersion();
-   }
-
    @Override
    public int hashCode()
    {
       return timestamp.hashCode();
    }
 
-   public abstract void setLocalVersion(Integer localVersion);
+   /**
+    * Determines if this object is fully constructed
+    * 
+    * @return true if the object is fully built, false otherwise
+    */
+   public boolean isFilled()
+   {
+      boolean allFilled = true;
+
+      // Get all the get methods and check that they're filled
+      try
+      {
+         for (Method meth : this.getClass().getMethods())
+            if (meth.getName().startsWith("get") && meth.getParameterTypes().length == 0)
+            {
+               Object obj = meth.invoke(this, new Object[0]);
+               if (obj == null)
+                  allFilled = false;
+            }
+      }
+      catch (IllegalAccessException e)
+      {
+         e.printStackTrace();
+         allFilled = false;
+      }
+      catch (InvocationTargetException e)
+      {
+         e.printStackTrace();
+         allFilled = false;
+      }
+
+      return allFilled;
+   }
 
    /**
     * Set method for the timestamp
@@ -75,10 +107,32 @@ public abstract class Memory implements Comparable<Memory>
       timestamp = value;
    }
 
-   public void setTimestamp(String value) throws ParseException
+   /**
+    * Set method for the timestamp
+    * 
+    * @param value
+    *           The string to parse
+    * @throws ParseException
+    *            If we can't parse the date
+    */
+   public void setTimestamp(final String value) throws ParseException
    {
       if (df == null)
          df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+      timestamp = df.parse(value).getTime();
+   }
+
+   /**
+    * Set method for the timestamp
+    * 
+    * @param value
+    *           The string to parse
+    * @throws ParseException
+    *            If we can't parse the date
+    */
+   public void setTimestamp(final String value, String format) throws ParseException
+   {
+      df = new SimpleDateFormat(format);
       timestamp = df.parse(value).getTime();
    }
 
