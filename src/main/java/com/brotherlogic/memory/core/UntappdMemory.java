@@ -10,6 +10,8 @@ import java.io.File;
  */
 public class UntappdMemory extends Memory implements ImageMemory
 {
+   private Double abv;
+
    /** The name of the beer */
    private String beerName = "";
 
@@ -27,6 +29,11 @@ public class UntappdMemory extends Memory implements ImageMemory
          return false;
 
       return super.equals(o);
+   }
+
+   public Double getAbv()
+   {
+      return abv;
    }
 
    /**
@@ -49,6 +56,11 @@ public class UntappdMemory extends Memory implements ImageMemory
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
+   }
+
+   public void setAbv(Double abv)
+   {
+      this.abv = abv;
    }
 
    /**
