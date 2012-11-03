@@ -75,14 +75,12 @@ public abstract class Memory implements Comparable<Memory>
       try
       {
          for (Method meth : this.getClass().getMethods())
-         {
             if (meth.getName().startsWith("get") && meth.getParameterTypes().length == 0)
             {
                Object obj = meth.invoke(this, new Object[0]);
                if (obj == null)
                   allFilled = false;
             }
-         }
       }
       catch (IllegalAccessException e)
       {
@@ -121,6 +119,20 @@ public abstract class Memory implements Comparable<Memory>
    {
       if (df == null)
          df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+      timestamp = df.parse(value).getTime();
+   }
+
+   /**
+    * Set method for the timestamp
+    * 
+    * @param value
+    *           The string to parse
+    * @throws ParseException
+    *            If we can't parse the date
+    */
+   public void setTimestamp(final String value, String format) throws ParseException
+   {
+      df = new SimpleDateFormat(format);
       timestamp = df.parse(value).getTime();
    }
 

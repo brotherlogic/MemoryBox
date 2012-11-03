@@ -2,6 +2,7 @@ package com.brotherlogic.memory;
 
 import java.io.IOException;
 
+import com.brotherlogic.memory.feeds.GitEventFeedReader;
 import com.brotherlogic.memory.feeds.UntappdFeedReader;
 
 /**
@@ -36,5 +37,8 @@ public class CommandLineUpdate
    {
       UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
       reader.update();
+
+      GitEventFeedReader reader2 = new GitEventFeedReader("brotherlogic");
+      reader2.update();
    }
 }
