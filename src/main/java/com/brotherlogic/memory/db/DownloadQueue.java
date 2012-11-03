@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A downloadable object
@@ -62,6 +64,7 @@ class Downloadable
    {
       this.pathToStore = path;
    }
+
 }
 
 /**
@@ -78,8 +81,12 @@ public abstract class DownloadQueue implements Runnable
    /** The time to wait before checking the queue */
    private static final int WAIT_TIME = 5000;
 
+   Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DownloadQueue");
+
    /** Flag to indicate that we're running */
-   private final boolean running = true;
+   private boolean running = true;
+
+   private boolean slowStop = false;
 
    /**
     * Blocking constructor
@@ -107,6 +114,8 @@ public abstract class DownloadQueue implements Runnable
     */
    private void doDownload(final Downloadable downloadable) throws IOException
    {
+      logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
+
       // Create the file if necessary
       File f = new File(downloadable.getPathToStore());
       if (!f.exists())
@@ -197,6 +206,13 @@ public abstract class DownloadQueue implements Runnable
             {
                e.printStackTrace();
             }
+         else if (slowStop)
+            running = false;
       }
+   }
+
+   public void slowStop()
+   {
+      slowStop = true;
    }
 }

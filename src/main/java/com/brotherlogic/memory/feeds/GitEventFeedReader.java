@@ -2,6 +2,7 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,10 +21,19 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected Memory buildMemory(String json) throws JSONException
+   protected Memory buildMemory(JSONObject obj) throws JSONException
    {
       GitMemory mem = new GitMemory();
-      mem.buildFromJSON(new JSONObject(json));
+      mem.setProject(obj.getJSONObject("repo").getString("name"));
+      mem.setBranch(obj.getJSONObject("payload").getString("ref"));
+      try
+      {
+         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-DD'T'HH:mm:ss'Z'");
+      }
+      catch (ParseException e)
+      {
+         e.printStackTrace();
+      }
       return mem;
    }
 
@@ -46,13 +56,11 @@ public class GitEventFeedReader extends JSONFeedReader
 
       for (int i = 0; i < arr.length(); i++)
       {
-         GitMemory mem = new GitMemory();
-         mem.buildFromJSON(arr.getJSONObject(i));
+         Memory mem = buildMemory(arr.getJSONObject(i));
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
 
       // We only get one page of git events
       return -1;
    }
-
 }
