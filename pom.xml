@@ -3,7 +3,7 @@
   <groupId>com.brotherlogic.memory</groupId>
   <artifactId>memorybox</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.6-SNAPSHOT</version>
+  <version>0.1.6</version>
   <name>memorybox</name>
   <url>http://maven.apache.org</url>
   <dependencies>
