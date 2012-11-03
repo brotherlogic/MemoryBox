@@ -128,6 +128,8 @@ public abstract class DBInterface
    public abstract Collection<Memory> retrieveMemories(Calendar day, String className)
          throws IOException;
 
+   public abstract Collection<Memory> retrieveMemories(Class className) throws IOException;
+
    /**
     * Retrieve a memory from the database
     * 
