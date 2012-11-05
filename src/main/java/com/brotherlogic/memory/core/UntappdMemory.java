@@ -12,8 +12,13 @@ public class UntappdMemory extends Memory implements ImageMemory
 {
    private Double abv;
 
+   /** The amount of liquid */
+   private Integer amount;
+
    /** The name of the beer */
-   private String beerName = "";
+   private String beerName = null;
+
+   private String breweryName = null;
 
    /** The path to the image */
    private File imageFile = new File("");
@@ -36,6 +41,12 @@ public class UntappdMemory extends Memory implements ImageMemory
       return abv;
    }
 
+   @Annotation
+   public Integer getAmount()
+   {
+      return amount;
+   }
+
    /**
     * Get method for beer name
     * 
@@ -44,6 +55,11 @@ public class UntappdMemory extends Memory implements ImageMemory
    public String getBeerName()
    {
       return beerName;
+   }
+
+   public String getBreweryName()
+   {
+      return breweryName;
    }
 
    @Override
@@ -63,6 +79,12 @@ public class UntappdMemory extends Memory implements ImageMemory
       this.abv = abv;
    }
 
+   @Annotation
+   public void setAmount(Integer amount)
+   {
+      this.amount = amount;
+   }
+
    /**
     * Set method for the beer name
     * 
@@ -74,6 +96,11 @@ public class UntappdMemory extends Memory implements ImageMemory
       this.beerName = name;
    }
 
+   public void setBreweryName(String breweryName)
+   {
+      this.breweryName = breweryName;
+   }
+
    @Override
    public void setImagePath(final String filePath)
    {
@@ -83,7 +110,7 @@ public class UntappdMemory extends Memory implements ImageMemory
    @Override
    public String toString()
    {
-      return "Untappd: " + imageFile + ", " + super.toString();
+      return "Untappd: " + breweryName + " - " + beerName + ", " + super.toString();
    }
 
 }

@@ -344,7 +344,12 @@ public class MongoInterface extends DBInterface
          refQ.put("ref_id", refId);
          DBObject storedObj = col.findOne(refQ);
          if (storedObj != null)
+         {
+            for (String key : getAnnotatedProps(potProperties))
+               if (storedObj.get(key) != null)
+                  obj.put(key, storedObj.get(key));
             col.update(refQ, obj);
+         }
          else
             col.insert(obj);
          return obj.getObjectId("_id");

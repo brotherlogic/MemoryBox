@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract representation of a Memory
@@ -17,13 +19,15 @@ public abstract class Memory implements Comparable<Memory>
    /** Used to process dates */
    private DateFormat df;
 
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
+
    /** The underlying timestamp for this memory (is unique) */
    private Long timestamp;
 
    @Override
    public int compareTo(final Memory o)
    {
-      return timestamp.compareTo(o.timestamp);
+      return -timestamp.compareTo(o.timestamp);
    }
 
    @Override
@@ -76,11 +80,16 @@ public abstract class Memory implements Comparable<Memory>
       {
          for (Method meth : this.getClass().getMethods())
             if (meth.getName().startsWith("get") && meth.getParameterTypes().length == 0)
-            {
-               Object obj = meth.invoke(this, new Object[0]);
-               if (obj == null)
-                  allFilled = false;
-            }
+               // Check that this isn't an annotation method
+               if (meth.getAnnotation(Annotation.class) == null)
+               {
+                  Object obj = meth.invoke(this, new Object[0]);
+                  if (obj == null)
+                  {
+                     logger.log(Level.INFO, meth.getName() + " is not filled for " + this);
+                     allFilled = false;
+                  }
+               }
       }
       catch (IllegalAccessException e)
       {
