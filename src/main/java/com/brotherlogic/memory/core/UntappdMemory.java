@@ -11,11 +11,14 @@ import java.io.File;
 public class UntappdMemory extends Memory implements ImageMemory
 {
    private Double abv;
+
    /** The amount of liquid */
    private Integer amount;
 
    /** The name of the beer */
-   private String beerName = "";
+   private String beerName = null;
+
+   private String breweryName = null;
 
    /** The path to the image */
    private File imageFile = new File("");
@@ -54,6 +57,11 @@ public class UntappdMemory extends Memory implements ImageMemory
       return beerName;
    }
 
+   public String getBreweryName()
+   {
+      return breweryName;
+   }
+
    @Override
    public String getImagePath()
    {
@@ -88,6 +96,11 @@ public class UntappdMemory extends Memory implements ImageMemory
       this.beerName = name;
    }
 
+   public void setBreweryName(String breweryName)
+   {
+      this.breweryName = breweryName;
+   }
+
    @Override
    public void setImagePath(final String filePath)
    {
@@ -97,7 +110,7 @@ public class UntappdMemory extends Memory implements ImageMemory
    @Override
    public String toString()
    {
-      return "Untappd: " + imageFile + ", " + super.toString();
+      return "Untappd: " + breweryName + " - " + beerName + ", " + super.toString();
    }
 
 }

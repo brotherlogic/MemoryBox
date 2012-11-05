@@ -73,27 +73,14 @@ public class MongoDownloadQueue extends DownloadQueue
    }
 
    @Override
-   protected String newFile()
+   protected String newFile(String url)
    {
       if (!new File(System.getProperty("user.home") + "/.memorybox/images").exists())
          new File(System.getProperty("user.home") + "/.memorybox/images").mkdirs();
 
       String base = System.getProperty("user.home") + "/.memorybox/images/";
-      int i = 0;
-      while (new File(base + i + ".image").exists())
-         i++;
 
-      File f = new File(base + i + ".image");
-      try
-      {
-         f.createNewFile();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      return new File(base + i + ".image").getAbsolutePath();
+      return new File(base + url.hashCode() + ".image").getAbsolutePath();
    }
 
    @Override

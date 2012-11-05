@@ -52,6 +52,7 @@ public class UntappdFeedReader extends JSONFeedReader
          mem.setTimestamp(json.getString("created_at"));
          mem.setBeerName(json.getJSONObject("beer").getString("beer_name"));
          mem.setAbv(json.getJSONObject("beer").getDouble("beer_abv"));
+         mem.setBreweryName(json.getJSONObject("brewery").getString("brewery_name"));
 
          // Get the largest image file that this references
          if (json.getJSONObject("media").getJSONArray("items").length() > 0)

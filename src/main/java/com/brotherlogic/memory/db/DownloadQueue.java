@@ -112,31 +112,41 @@ public abstract class DownloadQueue implements Runnable
     * @throws IOException
     *            if something goes wrong
     */
-   private void doDownload(final Downloadable downloadable) throws IOException
+   private boolean doDownload(final Downloadable downloadable) throws IOException
    {
+      boolean doneDownload = false;
       logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
 
-      // Create the file if necessary
+      // Create the file if necessary - we don't download if the file already
+      // exists
       File f = new File(downloadable.getPathToStore());
       if (!f.exists())
+      {
          if (!f.createNewFile())
             throw new IOException("Cannot create file: " + f.getAbsolutePath());
 
-      BufferedWriter writer = new BufferedWriter(new FileWriter(f));
-      BufferedReader reader = new BufferedReader(new InputStreamReader(downloadable
-            .getDownloadLocation().openStream()));
-      char[] byteBuffer = new char[BUFFER_SIZE];
-      int read = reader.read(byteBuffer);
-      while (read > 0)
-      {
-         writer.write(byteBuffer, 0, read);
-         read = reader.read(byteBuffer);
+         logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
+
+         doneDownload = true;
+
+         BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+         BufferedReader reader = new BufferedReader(new InputStreamReader(downloadable
+               .getDownloadLocation().openStream()));
+         char[] byteBuffer = new char[BUFFER_SIZE];
+         int read = reader.read(byteBuffer);
+         while (read > 0)
+         {
+            writer.write(byteBuffer, 0, read);
+            read = reader.read(byteBuffer);
+         }
+
+         reader.close();
+         writer.close();
       }
 
-      reader.close();
-      writer.close();
-
       removeFromQueue(downloadable);
+
+      return doneDownload;
    }
 
    /**
@@ -148,7 +158,7 @@ public abstract class DownloadQueue implements Runnable
     */
    public String download(final URL url)
    {
-      String location = newFile();
+      String location = newFile(url.toString());
       Downloadable able = new Downloadable();
       able.setDownloadLocation(url);
       able.setPathToStore(location);
@@ -170,7 +180,7 @@ public abstract class DownloadQueue implements Runnable
     * 
     * @return The place where the file is stored
     */
-   protected abstract String newFile();
+   protected abstract String newFile(String url);
 
    /**
     * Remove an item from the download queue
@@ -183,24 +193,26 @@ public abstract class DownloadQueue implements Runnable
    @Override
    public void run()
    {
+      boolean wait = true;
       while (running)
       {
          // Wait a bit
-         try
-         {
-            Thread.sleep(WAIT_TIME);
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
+         if (wait)
+            try
+            {
+               Thread.sleep(WAIT_TIME);
+            }
+            catch (InterruptedException e)
+            {
+               e.printStackTrace();
+            }
 
          // Process the next download
          Downloadable next = getFromQueue();
          if (next != null)
             try
             {
-               doDownload(next);
+               wait = doDownload(next);
             }
             catch (IOException e)
             {

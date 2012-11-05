@@ -40,7 +40,14 @@ public class ImageCalendarPane extends CalendarPane
    }
 
    @Override
-   protected void paintBox(Graphics g, Calendar date, int x, int y, int width, int height)
+   protected String getRowSummary(int row)
+   {
+      return null;
+   }
+
+   @Override
+   protected void paintBox(Graphics g, Calendar date, int x, int y, int width, int height,
+         int rowG, int day)
    {
       // TODO Auto-generated method stub
       try
