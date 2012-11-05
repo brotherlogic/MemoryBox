@@ -53,6 +53,9 @@ public abstract class FeedReader
 
       logger.log(Level.INFO, "Got " + mem + " and " + topDBMem);
 
+      if (topDBMem != null)
+         logger.log(Level.INFO, "Also: " + topDBMem.isFilled());
+
       // Check on the versions - we may not have got any DB Mems
       if (topDBMem == null)
          updateAllMemories(true);
@@ -60,6 +63,10 @@ public abstract class FeedReader
          updateAllMemories(false);
       else
       {
+         logger.log(Level.INFO, "Top " + topDBMem.getTimestamp() + " and " + mem.getTimestamp());
+         logger.log(Level.INFO, "Top = " + mem);
+         logger.log(Level.INFO, "DBTOP = " + topDBMem);
+
          // Check on the underlying representations
          String retBase = getUnderlyingRepresentation(mem);
          String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);

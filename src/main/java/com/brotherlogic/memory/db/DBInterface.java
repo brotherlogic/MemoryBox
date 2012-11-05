@@ -5,11 +5,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.brotherlogic.memory.core.Annotation;
 import com.brotherlogic.memory.core.Memory;
 
 /**
@@ -56,6 +59,27 @@ public abstract class DBInterface
                strs.put(getProperty(meth), meth.getDeclaringClass());
 
       return strs;
+   }
+
+   protected final Collection<String> getAnnotatedProps(Map<String, Class<?>> properties)
+   {
+      Collection<String> props = new LinkedList<String>();
+
+      for (Entry<String, Class<?>> prop : properties.entrySet())
+         try
+         {
+            Method getMethod = prop.getValue().getMethod(
+                  "get" + prop.getKey().substring(0, 1).toUpperCase() + prop.getKey().substring(1),
+                  new Class[0]);
+            if (getMethod.getAnnotation(Annotation.class) != null)
+               props.add(prop.getKey());
+         }
+         catch (NoSuchMethodException e)
+         {
+            e.printStackTrace();
+         }
+
+      return props;
    }
 
    /**

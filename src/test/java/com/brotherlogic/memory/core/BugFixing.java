@@ -7,6 +7,12 @@ import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * Test case for fixing bugs
+ * 
+ * @author simon
+ * 
+ */
 public class BugFixing extends DBTest
 {
    /**
@@ -17,10 +23,11 @@ public class BugFixing extends DBTest
    @Test
    public void testMemoryOverlap() throws IOException
    {
-      // Add two memories
+      // Add two memories - this one has an annotated field (amount)
       UntappdMemory mem1 = new UntappdMemory();
       mem1.setTimestamp(10L);
       mem1.setBeerName("Donkey");
+      mem1.setAmount(500);
 
       UntappdMemory mem2 = new UntappdMemory();
       mem2.setTimestamp(10L);
@@ -45,5 +52,9 @@ public class BugFixing extends DBTest
       // Should have added the ABV data
       Assert.assertNotNull("ABV has not been set", ((UntappdMemory) DBFactory.buildInterface()
             .retrieveMemories(UntappdMemory.class).iterator().next()).getAbv());
+
+      // Should have retained the amount information
+      Assert.assertNotNull("Amount has been reset?", ((UntappdMemory) DBFactory.buildInterface()
+            .retrieveMemories(UntappdMemory.class).iterator().next()).getAmount());
    }
 }
