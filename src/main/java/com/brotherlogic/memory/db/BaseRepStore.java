@@ -1,6 +1,7 @@
 package com.brotherlogic.memory.db;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import com.brotherlogic.memory.core.Memory;
 
@@ -23,6 +24,17 @@ public abstract class BaseRepStore
     *            if we can't retrieve for this given memory
     */
    public abstract String getBaseRep(Memory me) throws IOException;
+
+   /**
+    * Gets the base reps for a class of memories
+    * 
+    * @param className
+    *           The name of the class to get memories for
+    * @return A {@link Collection} of String base reps
+    * @throws IOException
+    *            if we can't access the database
+    */
+   public abstract Collection<String> getBaseRep(String className) throws IOException;
 
    /**
     * Stores the base rep somewhere

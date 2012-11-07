@@ -1,10 +1,6 @@
 package com.brotherlogic.memory.core;
 
 import java.io.File;
-import java.text.ParseException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Representation of an Untappd Memory
@@ -12,32 +8,20 @@ import org.json.JSONObject;
  * @author simon
  * 
  */
-public class UntappdMemory extends Memory implements ImageMemory, JSONConstructable
+public class UntappdMemory extends Memory implements ImageMemory
 {
+   private Double abv;
+
+   /** The amount of liquid */
+   private Integer amount;
+
    /** The name of the beer */
-   private String beerName = "";
+   private String beerName = null;
+
+   private String breweryName = null;
 
    /** The path to the image */
    private File imageFile = new File("");
-
-   /** The local version number */
-   private int version = 1;
-
-   @Override
-   public int buildFromJSON(final JSONObject obj) throws JSONException
-   {
-      int lversion = super.getVersion();
-
-      try
-      {
-         setTimestamp(obj.getString("created_at"));
-      }
-      catch (ParseException e)
-      {
-         System.err.println("Cannot parse: " + obj.getString("created_at"));
-      }
-      return lversion + version;
-   }
 
    @Override
    public boolean equals(final Object o)
@@ -52,6 +36,17 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return super.equals(o);
    }
 
+   public Double getAbv()
+   {
+      return abv;
+   }
+
+   @Annotation
+   public Integer getAmount()
+   {
+      return amount;
+   }
+
    /**
     * Get method for beer name
     * 
@@ -62,6 +57,11 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       return beerName;
    }
 
+   public String getBreweryName()
+   {
+      return breweryName;
+   }
+
    @Override
    public String getImagePath()
    {
@@ -69,15 +69,20 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
-   public int getLocalVersion()
-   {
-      return version;
-   }
-
-   @Override
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
+   }
+
+   public void setAbv(Double abv)
+   {
+      this.abv = abv;
+   }
+
+   @Annotation
+   public void setAmount(Integer amount)
+   {
+      this.amount = amount;
    }
 
    /**
@@ -91,6 +96,11 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
       this.beerName = name;
    }
 
+   public void setBreweryName(String breweryName)
+   {
+      this.breweryName = breweryName;
+   }
+
    @Override
    public void setImagePath(final String filePath)
    {
@@ -98,15 +108,9 @@ public class UntappdMemory extends Memory implements ImageMemory, JSONConstructa
    }
 
    @Override
-   public void setLocalVersion(final Integer localVersion)
-   {
-      version = localVersion;
-   }
-
-   @Override
    public String toString()
    {
-      return "Untappd: " + imageFile + ", " + super.toString();
+      return "Untappd: " + breweryName + " - " + beerName + ", " + super.toString();
    }
 
 }

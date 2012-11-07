@@ -14,9 +14,6 @@ public class DiscogsMemory extends Memory implements ImageMemory
    /** The path to the given image file */
    private String imagePath;
 
-   /** The local version of the memory */
-   private int localVersion = 1;
-
    /**
     * Get method for artist
     * 
@@ -31,12 +28,6 @@ public class DiscogsMemory extends Memory implements ImageMemory
    public String getImagePath()
    {
       return imagePath;
-   }
-
-   @Override
-   public int getLocalVersion()
-   {
-      return localVersion;
    }
 
    /**
@@ -55,11 +46,4 @@ public class DiscogsMemory extends Memory implements ImageMemory
    {
       imagePath = path;
    }
-
-   @Override
-   public void setLocalVersion(final Integer localVersionIn)
-   {
-      this.localVersion = localVersionIn;
-   }
-
 }

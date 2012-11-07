@@ -3,10 +3,15 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 
@@ -34,6 +39,8 @@ public class MongoInterface extends DBInterface
 
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
+
+   private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoInterface");
 
    /** The underlying database */
    private DB mongo;
@@ -131,7 +138,7 @@ public class MongoInterface extends DBInterface
    @Override
    public DownloadQueue getDownloadQueue()
    {
-      return null;
+      return new MongoDownloadQueue();
    }
 
    @Override
@@ -159,6 +166,57 @@ public class MongoInterface extends DBInterface
       }
 
       return null;
+   }
+
+   @Override
+   public Collection<Memory> retrieveMemories(Calendar day, String className) throws IOException
+   {
+      Collection<Memory> mems = new LinkedList<Memory>();
+
+      DBCollection col = getCollection(Memory.class);
+      Calendar query = Calendar.getInstance();
+      query.setTimeInMillis(day.getTimeInMillis());
+      query.set(Calendar.HOUR, 0);
+      query.set(Calendar.MINUTE, 0);
+      query.set(Calendar.SECOND, 0);
+
+      long qStart = query.getTimeInMillis();
+      query.add(Calendar.DAY_OF_YEAR, 1);
+      long qEnd = query.getTimeInMillis();
+
+      DBObject dbquery = new BasicDBObject();
+      DBObject filter = new BasicDBObject();
+      filter.put("$gt", qStart);
+      filter.put("$lt", qEnd);
+      dbquery.put("timestamp", filter);
+
+      DBCursor res = col.find(dbquery);
+      while (res.hasNext())
+      {
+         DBObject obj = res.next();
+         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
+      }
+      res.close();
+
+      return mems;
+   }
+
+   @Override
+   public Collection<Memory> retrieveMemories(Class cls) throws IOException
+   {
+      Collection<Memory> mems = new LinkedList<Memory>();
+      DBCollection col = getCollection(Memory.class);
+      DBObject query = new BasicDBObject();
+      query.put("memoryClass", cls.getName());
+      DBCursor cursor = col.find();
+      while (cursor.hasNext())
+      {
+         DBObject obj = cursor.next();
+         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+      }
+      cursor.close();
+
+      return mems;
    }
 
    @Override
@@ -223,14 +281,17 @@ public class MongoInterface extends DBInterface
    private void setProperties(final Class<?> cls, final Memory obj,
          final Map<String, Class<?>> properties, final ObjectId refId) throws IOException
    {
+      logger.log(Level.INFO, "Setting properties " + cls + " given " + obj + " and " + refId);
+
       BasicDBObject query = new BasicDBObject();
       query.put(REF_NAME, refId);
       DBObject retObj = getCollection(cls).findOne(query);
 
       // Match up these properties
-      for (Entry<String, Class<?>> propEntry : properties.entrySet())
-         if (propEntry.getValue().equals(cls))
-            setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
+      if (retObj != null)
+         for (Entry<String, Class<?>> propEntry : properties.entrySet())
+            if (propEntry.getValue().equals(cls))
+               setProperty(obj, propEntry.getKey(), retObj.get(propEntry.getKey()));
    }
 
    /**
@@ -264,8 +325,35 @@ public class MongoInterface extends DBInterface
       if (refId != null)
          obj.put("ref_id", refId);
 
-      col.insert(obj);
-      return obj.getObjectId("_id");
+      // If this is the base class - check that we're not already added
+      if (refId == null)
+      {
+         DBObject storedObj = col.findOne(obj);
+         if (storedObj != null)
+            return (ObjectId) storedObj.get("_id");
+         else
+         {
+            col.insert(obj);
+            return obj.getObjectId("_id");
+         }
+      }
+      else
+      {
+         // Check that this referenced object isn't already stored
+         DBObject refQ = new BasicDBObject();
+         refQ.put("ref_id", refId);
+         DBObject storedObj = col.findOne(refQ);
+         if (storedObj != null)
+         {
+            for (String key : getAnnotatedProps(potProperties))
+               if (storedObj.get(key) != null)
+                  obj.put(key, storedObj.get(key));
+            col.update(refQ, obj);
+         }
+         else
+            col.insert(obj);
+         return obj.getObjectId("_id");
+      }
    }
 
    @Override

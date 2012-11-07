@@ -52,19 +52,26 @@ public abstract class FeedReader
          topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
 
       logger.log(Level.INFO, "Got " + mem + " and " + topDBMem);
-      if (mem != null && topDBMem != null)
-         logger.log(Level.INFO, "Version: " + mem.getVersion() + " and " + topDBMem.getVersion());
+
+      if (topDBMem != null)
+         logger.log(Level.INFO, "Also: " + topDBMem.isFilled());
 
       // Check on the versions - we may not have got any DB Mems
-      if (topDBMem == null || mem.getVersion() != topDBMem.getVersion())
-         updateAllMemories();
+      if (topDBMem == null)
+         updateAllMemories(true);
+      else if (!topDBMem.isFilled())
+         updateAllMemories(false);
       else
       {
+         logger.log(Level.INFO, "Top " + topDBMem.getTimestamp() + " and " + mem.getTimestamp());
+         logger.log(Level.INFO, "Top = " + mem);
+         logger.log(Level.INFO, "DBTOP = " + topDBMem);
+
          // Check on the underlying representations
          String retBase = getUnderlyingRepresentation(mem);
          String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);
          if (!retBase.equals(givenBase))
-            updateAllMemories();
+            updateAllMemories(true);
          else if (mem.getTimestamp() > topDBMem.getTimestamp())
             updateMemories(topDBMem.getTimestamp());
       }
@@ -73,10 +80,13 @@ public abstract class FeedReader
    /**
     * Update all the memories - refresh the memories
     * 
+    * @param alsoUpdateUnderlying
+    *           if we also know that we need to update the underlying
+    *           representation
     * @throws IOException
     *            if we can't update the memories
     */
-   public abstract void updateAllMemories() throws IOException;
+   public abstract void updateAllMemories(boolean alsoUpdateUnderlying) throws IOException;
 
    /**
     * Update the memories up to the latest version

@@ -2,6 +2,7 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,7 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.core.UntappdMemory;
+import com.brotherlogic.memory.db.DBFactory;
 
 /**
  * Feed Reader for Untappd
@@ -38,6 +41,47 @@ public class UntappdFeedReader extends JSONFeedReader
    public UntappdFeedReader(final String user)
    {
       username = user;
+   }
+
+   @Override
+   protected Memory buildMemory(final JSONObject json) throws JSONException
+   {
+      UntappdMemory mem = new UntappdMemory();
+      try
+      {
+         mem.setTimestamp(json.getString("created_at"));
+         mem.setBeerName(json.getJSONObject("beer").getString("beer_name"));
+         mem.setAbv(json.getJSONObject("beer").getDouble("beer_abv"));
+         mem.setBreweryName(json.getJSONObject("brewery").getString("brewery_name"));
+
+         // Get the largest image file that this references
+         if (json.getJSONObject("media").getJSONArray("items").length() > 0)
+         {
+            String largeURL = json.getJSONObject("media").getJSONArray("items").getJSONObject(0)
+                  .getJSONObject("photo").getString("photo_img_og");
+            mem.setImagePath(DBFactory.buildInterface().getDownloadQueue()
+                  .download(new URL(largeURL)));
+         }
+         else
+            mem.setImagePath("NONE");
+      }
+      catch (ParseException e)
+      {
+         System.err.println("Cannot parse: " + json.getString("created_at"));
+      }
+      catch (MalformedURLException e)
+      {
+         System.err.println("Cannot urlise: "
+               + json.getJSONObject("media").getJSONObject("photo").getString("photo_img_og"));
+      }
+
+      return mem;
+   }
+
+   @Override
+   protected final String getClassName()
+   {
+      return UntappdMemory.class.getName();
    }
 
    @Override
@@ -70,8 +114,7 @@ public class UntappdFeedReader extends JSONFeedReader
 
       for (int i = 0; i < arr.length(); i++)
       {
-         UntappdMemory mem = new UntappdMemory();
-         mem.buildFromJSON(arr.getJSONObject(i));
+         Memory mem = buildMemory(arr.getJSONObject(i));
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
       return nextVal;
