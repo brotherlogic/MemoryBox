@@ -50,6 +50,13 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
+   protected void login()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
    protected long processFeedText(String text) throws JSONException
    {
       JSONArray arr = new JSONArray(text);

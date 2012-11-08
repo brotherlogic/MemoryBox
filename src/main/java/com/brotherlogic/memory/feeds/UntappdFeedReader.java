@@ -100,6 +100,13 @@ public class UntappdFeedReader extends JSONFeedReader
    }
 
    @Override
+   protected void login()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
    protected long processFeedText(final String text) throws JSONException
    {
       JSONObject obj = new JSONObject(text);
