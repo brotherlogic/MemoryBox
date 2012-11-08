@@ -1,10 +1,17 @@
 package com.brotherlogic.memory.core;
 
-
+/**
+ * A git checkin
+ * 
+ * @author simon
+ * 
+ */
 public class GitMemory extends Memory
 {
+   /** The branch to which we checked in */
    private String branch;
 
+   /** The project we checked in on */
    private String project;
 
    public String getBranch()
