@@ -58,7 +58,7 @@ public class GitCalendarPane extends CalendarPane
             for (Memory mem : memories)
             {
                System.out.println("HERE: " + mem);
-               if (((GitMemory) mem).getBranch().equals("refs/head/master"))
+               if (((GitMemory) mem).getBranch().equals("refs/heads/master"))
                   found = true;
             }
             if (found)

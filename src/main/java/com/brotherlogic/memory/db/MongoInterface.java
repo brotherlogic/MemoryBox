@@ -186,6 +186,8 @@ public class MongoInterface extends DBInterface
       query.add(Calendar.DAY_OF_YEAR, 1);
       long qEnd = query.getTimeInMillis();
 
+      System.out.println(qStart + " to " + qEnd);
+
       DBObject dbquery = new BasicDBObject();
       DBObject filter = new BasicDBObject();
       filter.put("$gt", qStart);
