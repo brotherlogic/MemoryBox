@@ -120,11 +120,18 @@ public class UntappdAnnotationUI extends JPanel
       Collection<Memory> memories = DBFactory.buildInterface()
             .retrieveMemories(UntappdMemory.class);
       for (Memory memory : memories)
-         if (((UntappdMemory) memory).getAmount() == null)
+         if (((UntappdMemory) memory).getAmount() == null
+               && ((UntappdMemory) memory).getBeerName() != null)
          {
             set((UntappdMemory) memory);
             return;
          }
+         else if (((UntappdMemory) memory).getAmount() == null)
+            System.out
+                  .println("HERE: " + memory.getMemoryClass() + " and " + memory.getTimestamp());
+
+      // Force quit here
+      System.exit(1);
    }
 
    public void set(UntappdMemory mem)

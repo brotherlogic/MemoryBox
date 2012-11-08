@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 public abstract class CalendarPane extends JPanel
 {
-   int month = Calendar.getInstance().get(Calendar.MONTH) - 1;
+   int month = Calendar.getInstance().get(Calendar.MONTH);
 
    int SIDE_MARGIN = 20;
    int TOP_MARGIN = 50;

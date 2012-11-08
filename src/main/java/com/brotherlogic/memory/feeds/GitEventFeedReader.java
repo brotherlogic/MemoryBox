@@ -28,7 +28,7 @@ public class GitEventFeedReader extends JSONFeedReader
       mem.setBranch(obj.getJSONObject("payload").getString("ref"));
       try
       {
-         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-DD'T'HH:mm:ss'Z'");
+         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-dd'T'HH:mm:ss'Z'");
       }
       catch (ParseException e)
       {

@@ -1,10 +1,17 @@
 package com.brotherlogic.memory.core;
 
-
+/**
+ * A git checkin
+ * 
+ * @author simon
+ * 
+ */
 public class GitMemory extends Memory
 {
+   /** The branch to which we checked in */
    private String branch;
 
+   /** The project we checked in on */
    private String project;
 
    public String getBranch()
@@ -25,5 +32,13 @@ public class GitMemory extends Memory
    public void setProject(String project)
    {
       this.project = project;
+   }
+
+   @Override
+   public String toString()
+   {
+      String retString = super.toString();
+      retString += ", Branch = " + branch + ", Project = " + project;
+      return retString;
    }
 }

@@ -65,7 +65,9 @@ public class UntappdCalendarPane extends ImageCalendarPane
             if (!rowCount.containsKey(rowG))
                rowCount.put(rowG, 0.0);
             UntappdMemory uMem = (UntappdMemory) mem;
-            rowCount.put(rowG, rowCount.get(rowG) + (uMem.getAbv() * uMem.getAmount() / 1000));
+
+            if (uMem.getAmount() != null)
+               rowCount.put(rowG, rowCount.get(rowG) + (uMem.getAbv() * uMem.getAmount() / 1000));
          }
       }
       catch (IOException e)
