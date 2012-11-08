@@ -208,7 +208,7 @@ public class MongoInterface extends DBInterface
       DBCollection col = getCollection(Memory.class);
       DBObject query = new BasicDBObject();
       query.put("memoryClass", cls.getName());
-      DBCursor cursor = col.find();
+      DBCursor cursor = col.find(query);
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
