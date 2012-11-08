@@ -173,7 +173,7 @@ public abstract class JSONFeedReader extends FeedReader
     * @throws IOException
     *            if we can't reach the URL
     */
-   private String read(final URL urlToRead) throws IOException
+   protected String read(final URL urlToRead) throws IOException
    {
       logger.log(Level.INFO, "Reading " + urlToRead);
       StringBuffer readText = new StringBuffer();
