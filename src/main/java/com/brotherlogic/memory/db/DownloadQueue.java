@@ -3,9 +3,13 @@ package com.brotherlogic.memory.db;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -182,6 +186,8 @@ public abstract class DownloadQueue implements Runnable
     */
    protected abstract String newFile(String url);
 
+   protected abstract String newStore(String key);
+
    /**
     * Remove an item from the download queue
     * 
@@ -189,6 +195,24 @@ public abstract class DownloadQueue implements Runnable
     *           The item to remove
     */
    protected abstract void removeFromQueue(Downloadable dl);
+
+   public Object retrieveObject(String key) throws IOException
+   {
+      try
+      {
+         File f = new File(newStore(key));
+         if (!f.exists())
+            return null;
+         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+         Object o = ois.readObject();
+         ois.close();
+         return o;
+      }
+      catch (ClassNotFoundException e)
+      {
+         throw new IOException(e);
+      }
+   }
 
    @Override
    public void run()
@@ -221,6 +245,14 @@ public abstract class DownloadQueue implements Runnable
          else if (slowStop)
             running = false;
       }
+   }
+
+   public void saveObject(Object o, String key) throws IOException
+   {
+      File f = new File(newStore(key));
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+      oos.writeObject(o);
+      oos.close();
    }
 
    public void slowStop()
