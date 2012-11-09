@@ -16,9 +16,21 @@ import com.brotherlogic.memory.core.ImageMemory;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * A calendar which paints image memories
+ * 
+ * @author simon
+ * 
+ */
 public class ImageCalendarPane extends CalendarPane
 {
-   public static void main(String[] args)
+   /**
+    * Main method
+    * 
+    * @param args
+    *           No arguments used
+    */
+   public static void main(final String[] args)
    {
       JFrame framer = new JFrame();
       ImageCalendarPane pane = new ImageCalendarPane("com.brotherlogic.memory.core.UntappdMemory");
@@ -32,22 +44,29 @@ public class ImageCalendarPane extends CalendarPane
 
    }
 
-   String imageType;
+   /** The type of image */
+   private final String imageType;
 
-   public ImageCalendarPane(String type)
+   /**
+    * Constructor
+    * 
+    * @param type
+    *           The type of images we're constructing
+    */
+   public ImageCalendarPane(final String type)
    {
       imageType = type;
    }
 
    @Override
-   protected String getRowSummary(int row)
+   protected String getRowSummary(final int row)
    {
       return null;
    }
 
    @Override
-   protected void paintBox(Graphics g, Calendar date, int x, int y, int width, int height,
-         int rowG, int day)
+   protected void paintBox(final Graphics g, final Calendar date, final int x, final int y,
+         final int width, final int height, final int rowG, final int day)
    {
       // TODO Auto-generated method stub
       try

@@ -29,6 +29,12 @@ public abstract class FeedReader
     */
    public abstract String getUnderlyingRepresentation(Memory mem) throws IOException;
 
+   /**
+    * Login to the system if necessary
+    * 
+    * @throws IOException
+    *            If something goes wrong
+    */
    protected abstract void login() throws IOException;
 
    /**

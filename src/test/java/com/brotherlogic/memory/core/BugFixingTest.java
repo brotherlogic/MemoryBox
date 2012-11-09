@@ -17,6 +17,12 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public class BugFixingTest extends DBTest
 {
+   /**
+    * Test retrieving stuff from GIT
+    * 
+    * @throws IOException
+    *            if something goes wrong
+    */
    @Test
    public void testGitRetrieve() throws IOException
    {
@@ -56,6 +62,7 @@ public class BugFixingTest extends DBTest
     * Tests that memory additions don't overlap
     * 
     * @throws IOException
+    *            if something goes wrong
     */
    @Test
    public void testMemoryOverlap() throws IOException

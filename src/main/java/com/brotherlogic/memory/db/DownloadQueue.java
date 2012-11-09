@@ -85,11 +85,13 @@ public abstract class DownloadQueue implements Runnable
    /** The time to wait before checking the queue */
    private static final int WAIT_TIME = 5000;
 
-   Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DownloadQueue");
+   /** Used to log stuff */
+   private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DownloadQueue");
 
    /** Flag to indicate that we're running */
    private boolean running = true;
 
+   /** Flag indicating we're in the slow stop */
    private boolean slowStop = false;
 
    /**
@@ -115,6 +117,7 @@ public abstract class DownloadQueue implements Runnable
     *           The object to download
     * @throws IOException
     *            if something goes wrong
+    * @return flag indicating we've downloaded something
     */
    private boolean doDownload(final Downloadable downloadable) throws IOException
    {
@@ -182,10 +185,20 @@ public abstract class DownloadQueue implements Runnable
    /**
     * Build a new file
     * 
+    * @param url
+    *           The URL to build for
+    * 
     * @return The place where the file is stored
     */
    protected abstract String newFile(String url);
 
+   /**
+    * Store an arbritary file
+    * 
+    * @param key
+    *           The key to store under
+    * @return The String path to a file where this object can be stored
+    */
    protected abstract String newStore(String key);
 
    /**
@@ -196,7 +209,16 @@ public abstract class DownloadQueue implements Runnable
     */
    protected abstract void removeFromQueue(Downloadable dl);
 
-   public Object retrieveObject(String key) throws IOException
+   /**
+    * Retrieve an object from the store
+    * 
+    * @param key
+    *           THe key that defines the object
+    * @return The object itself
+    * @throws IOException
+    *            If we can't process the underlying file for whatever reason
+    */
+   public Object retrieveObject(final String key) throws IOException
    {
       try
       {
@@ -247,7 +269,17 @@ public abstract class DownloadQueue implements Runnable
       }
    }
 
-   public void saveObject(Object o, String key) throws IOException
+   /**
+    * Save an object in the storage
+    * 
+    * @param o
+    *           The object to save
+    * @param key
+    *           The key to store under
+    * @throws IOException
+    *            If something goes wrong
+    */
+   public void saveObject(final Object o, final String key) throws IOException
    {
       File f = new File(newStore(key));
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
@@ -255,6 +287,10 @@ public abstract class DownloadQueue implements Runnable
       oos.close();
    }
 
+   /**
+    * Slow stops the download queue - i.e. waits until all downloads have been
+    * processed and then stops
+    */
    public void slowStop()
    {
       slowStop = true;

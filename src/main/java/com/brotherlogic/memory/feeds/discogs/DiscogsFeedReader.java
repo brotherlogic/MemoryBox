@@ -25,21 +25,22 @@ import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.feeds.Config;
 import com.brotherlogic.memory.feeds.JSONFeedReader;
 
+/**
+ * Discogs feed reader
+ * 
+ * @author simon
+ * 
+ */
 public class DiscogsFeedReader extends JSONFeedReader
 {
-   public static void main(String[] args) throws Exception
-   {
-      DiscogsFeedReader dfr = new DiscogsFeedReader();
-      dfr.login();
-      dfr.update();
-   }
+   /** THe access token generated in oauth */
+   private Token accessToken;
 
-   Token accessToken;
-
-   OAuthService service;
+   /** The OAuth service used to pull URLS */
+   private OAuthService service;
 
    @Override
-   protected Memory buildMemory(JSONObject json) throws JSONException
+   protected Memory buildMemory(final JSONObject json) throws JSONException
    {
       DiscogsMemory mem = new DiscogsMemory();
       String artistString = "";
@@ -57,7 +58,7 @@ public class DiscogsFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(long pagination) throws MalformedURLException
+   protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
       return new URL("http://api.discogs.com/users/brotherlogic/collection/folders/242017/releases");
    }
@@ -94,7 +95,7 @@ public class DiscogsFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(String text) throws JSONException
+   protected long processFeedText(final String text) throws JSONException
    {
       JSONObject obj = new JSONObject(text);
       JSONArray arr = obj.getJSONArray("releases");
@@ -108,7 +109,7 @@ public class DiscogsFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected String read(URL urlToRead)
+   protected String read(final URL urlToRead)
    {
       OAuthRequest request = new OAuthRequest(Verb.GET, urlToRead.toString());
       service.signRequest(accessToken, request);

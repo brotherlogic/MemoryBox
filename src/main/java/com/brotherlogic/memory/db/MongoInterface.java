@@ -40,6 +40,7 @@ public class MongoInterface extends DBInterface
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
 
+   /** Used to log output */
    private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoInterface");
 
    /** The underlying database */
@@ -171,7 +172,8 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Calendar day, String className) throws IOException
+   public Collection<Memory> retrieveMemories(final Calendar day, final String className)
+         throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
 
@@ -207,7 +209,7 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Class cls) throws IOException
+   public Collection<Memory> retrieveMemories(final Class<?> cls) throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
       DBCollection col = getCollection(Memory.class);

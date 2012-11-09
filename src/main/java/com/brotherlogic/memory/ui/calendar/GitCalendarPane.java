@@ -3,7 +3,6 @@ package com.brotherlogic.memory.ui.calendar;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 
@@ -21,7 +20,13 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public class GitCalendarPane extends CalendarPane
 {
-   public static void main(String[] args)
+   /**
+    * Main method
+    * 
+    * @param args
+    *           No command line arguments are used
+    */
+   public static void main(final String[] args)
    {
       JFrame framer = new JFrame();
       GitCalendarPane pane = new GitCalendarPane();
@@ -34,8 +39,6 @@ public class GitCalendarPane extends CalendarPane
       framer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
 
-   DateFormat df = DateFormat.getDateInstance();
-
    @Override
    protected String getRowSummary(final int row)
    {
@@ -43,8 +46,8 @@ public class GitCalendarPane extends CalendarPane
    }
 
    @Override
-   protected void paintBox(Graphics g, Calendar date, int x, int y, int width, int height, int row,
-         int day)
+   protected void paintBox(final Graphics g, final Calendar date, final int x, final int y,
+         final int width, final int height, final int row, final int day)
    {
       // Draw an x if we've checked some code in that day
       try
