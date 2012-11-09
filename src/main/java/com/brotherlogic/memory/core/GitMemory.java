@@ -33,4 +33,12 @@ public class GitMemory extends Memory
    {
       this.project = project;
    }
+
+   @Override
+   public String toString()
+   {
+      String retString = super.toString();
+      retString += ", Branch = " + branch + ", Project = " + project;
+      return retString;
+   }
 }

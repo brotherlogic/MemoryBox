@@ -29,6 +29,8 @@ public abstract class FeedReader
     */
    public abstract String getUnderlyingRepresentation(Memory mem) throws IOException;
 
+   protected abstract void login() throws IOException;
+
    /**
     * Probes the feed - returns the latest memory
     * 
@@ -46,6 +48,7 @@ public abstract class FeedReader
     */
    public void update() throws IOException
    {
+      login();
       Memory mem = probeFeed();
       Memory topDBMem = null;
       if (mem != null)

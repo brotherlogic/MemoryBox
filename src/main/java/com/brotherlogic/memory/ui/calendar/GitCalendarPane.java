@@ -51,15 +51,24 @@ public class GitCalendarPane extends CalendarPane
       {
          Collection<Memory> memories = DBFactory.buildInterface().retrieveMemories(date,
                GitMemory.class.getName());
-         for (Memory mem : memories)
-            System.out.println(day + ": " + mem);
+
          if (memories.size() > 0)
          {
-            Color oldColor = g.getColor();
-            g.setColor(Color.red);
-            g.drawLine(x, y, x + width, y + height);
-            g.drawLine(x + width, y, x, y + height);
-            g.setColor(oldColor);
+            boolean found = false;
+            for (Memory mem : memories)
+            {
+               System.out.println("HERE: " + mem);
+               if (((GitMemory) mem).getBranch().equals("refs/heads/master"))
+                  found = true;
+            }
+            if (found)
+            {
+               Color oldColor = g.getColor();
+               g.setColor(Color.red);
+               g.drawLine(x, y, x + width, y + height);
+               g.drawLine(x + width, y, x, y + height);
+               g.setColor(oldColor);
+            }
          }
       }
       catch (IOException e)

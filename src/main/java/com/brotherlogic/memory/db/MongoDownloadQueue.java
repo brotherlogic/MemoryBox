@@ -84,6 +84,17 @@ public class MongoDownloadQueue extends DownloadQueue
    }
 
    @Override
+   protected String newStore(String key)
+   {
+      if (!new File(System.getProperty("user.home") + "/.memorybox/objects").exists())
+         new File(System.getProperty("user.home") + "/.memorybox/objects").mkdirs();
+
+      String base = System.getProperty("user.home") + "/.memorybox/objects/";
+
+      return new File(base + key).getAbsolutePath();
+   }
+
+   @Override
    protected void removeFromQueue(Downloadable dl)
    {
       connect();

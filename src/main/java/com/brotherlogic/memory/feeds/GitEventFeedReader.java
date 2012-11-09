@@ -28,7 +28,7 @@ public class GitEventFeedReader extends JSONFeedReader
       mem.setBranch(obj.getJSONObject("payload").getString("ref"));
       try
       {
-         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-DD'T'HH:mm:ss'Z'");
+         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-dd'T'HH:mm:ss'Z'");
       }
       catch (ParseException e)
       {
@@ -47,6 +47,13 @@ public class GitEventFeedReader extends JSONFeedReader
    protected URL getFeedURL(long pagination) throws MalformedURLException
    {
       return new URL("https://api.github.com/users/" + username + "/events");
+   }
+
+   @Override
+   protected void login()
+   {
+      // TODO Auto-generated method stub
+
    }
 
    @Override

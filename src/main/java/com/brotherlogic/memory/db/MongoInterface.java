@@ -94,6 +94,8 @@ public class MongoInterface extends DBInterface
    public final void enrichMemory(final Memory obj, final ObjectId id,
          final Map<String, Class<?>> properties) throws IOException
    {
+      logger.log(Level.INFO, "Enriching " + obj.getClass() + " with " + properties);
+
       // Ignore the core memory properties!
       Set<Class<?>> classes = new HashSet<Class<?>>(properties.values());
       classes.remove(Memory.class);
@@ -184,11 +186,14 @@ public class MongoInterface extends DBInterface
       query.add(Calendar.DAY_OF_YEAR, 1);
       long qEnd = query.getTimeInMillis();
 
+      System.out.println(qStart + " to " + qEnd);
+
       DBObject dbquery = new BasicDBObject();
       DBObject filter = new BasicDBObject();
       filter.put("$gt", qStart);
       filter.put("$lt", qEnd);
       dbquery.put("timestamp", filter);
+      dbquery.put("memoryClass", className);
 
       DBCursor res = col.find(dbquery);
       while (res.hasNext())
@@ -208,7 +213,7 @@ public class MongoInterface extends DBInterface
       DBCollection col = getCollection(Memory.class);
       DBObject query = new BasicDBObject();
       query.put("memoryClass", cls.getName());
-      DBCursor cursor = col.find();
+      DBCursor cursor = col.find(query);
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
@@ -286,6 +291,8 @@ public class MongoInterface extends DBInterface
       BasicDBObject query = new BasicDBObject();
       query.put(REF_NAME, refId);
       DBObject retObj = getCollection(cls).findOne(query);
+
+      logger.log(Level.INFO, "Found object = " + retObj);
 
       // Match up these properties
       if (retObj != null)
