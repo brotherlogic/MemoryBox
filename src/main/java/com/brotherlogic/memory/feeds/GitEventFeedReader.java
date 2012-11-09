@@ -11,17 +11,30 @@ import org.json.JSONObject;
 import com.brotherlogic.memory.core.GitMemory;
 import com.brotherlogic.memory.core.Memory;
 
+/**
+ * Reads git events and converts them to memories
+ * 
+ * @author simon
+ * 
+ */
 public class GitEventFeedReader extends JSONFeedReader
 {
-   String username;
+   /** The username to retrieve for */
+   private final String username;
 
-   public GitEventFeedReader(String user)
+   /**
+    * Constructor
+    * 
+    * @param user
+    *           The name of the user to read
+    */
+   public GitEventFeedReader(final String user)
    {
       username = user;
    }
 
    @Override
-   protected Memory buildMemory(JSONObject obj) throws JSONException
+   protected Memory buildMemory(final JSONObject obj) throws JSONException
    {
       GitMemory mem = new GitMemory();
       mem.setProject(obj.getJSONObject("repo").getString("name"));
@@ -44,7 +57,7 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(long pagination) throws MalformedURLException
+   protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
       return new URL("https://api.github.com/users/" + username + "/events");
    }
@@ -57,7 +70,7 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(String text) throws JSONException
+   protected long processFeedText(final String text) throws JSONException
    {
       JSONArray arr = new JSONArray(text);
 
