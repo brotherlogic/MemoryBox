@@ -13,9 +13,21 @@ import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.core.UntappdMemory;
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * Beer calendar
+ * 
+ * @author simon
+ * 
+ */
 public class UntappdCalendarPane extends ImageCalendarPane
 {
-   public static void main(String[] args)
+   /**
+    * Main method
+    * 
+    * @param args
+    *           No command line arguments
+    */
+   public static void main(final String[] args)
    {
       JFrame framer = new JFrame();
       UntappdCalendarPane pane = new UntappdCalendarPane();
@@ -28,29 +40,33 @@ public class UntappdCalendarPane extends ImageCalendarPane
       framer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
 
-   Map<Integer, Double> rowCount = new TreeMap<Integer, Double>();
+   /** Units per row */
+   private final Map<Integer, Double> rowCount = new TreeMap<Integer, Double>();
 
+   /**
+    * Constructor
+    */
    public UntappdCalendarPane()
    {
       super("com.brotherlogic.memory.core.UntappdMemory");
    }
 
    @Override
-   protected String getRowSummary(int row)
+   protected String getRowSummary(final int row)
    {
       return "" + rowCount.get(row);
    }
 
    @Override
-   public void paint(Graphics g)
+   public void paint(final Graphics g)
    {
       rowCount.clear();
       super.paint(g);
    }
 
    @Override
-   protected void paintBox(Graphics g, Calendar date, int x, int y, int width, int height,
-         int rowG, int day)
+   protected void paintBox(final Graphics g, final Calendar date, final int x, final int y,
+         final int width, final int height, final int rowG, final int day)
    {
 
       // TODO Auto-generated method stub

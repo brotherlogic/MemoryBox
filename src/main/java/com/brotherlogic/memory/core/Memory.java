@@ -19,6 +19,7 @@ public abstract class Memory implements Comparable<Memory>
    /** Used to process dates */
    private DateFormat df;
 
+   /** Used to log output */
    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
    /** The underlying timestamp for this memory (is unique) */
@@ -136,10 +137,12 @@ public abstract class Memory implements Comparable<Memory>
     * 
     * @param value
     *           The string to parse
+    * @param format
+    *           this format to parse
     * @throws ParseException
     *            If we can't parse the date
     */
-   public void setTimestamp(final String value, String format) throws ParseException
+   public void setTimestamp(final String value, final String format) throws ParseException
    {
       df = new SimpleDateFormat(format);
       timestamp = df.parse(value).getTime();

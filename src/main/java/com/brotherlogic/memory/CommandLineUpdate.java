@@ -1,7 +1,5 @@
 package com.brotherlogic.memory;
 
-import java.io.IOException;
-
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DownloadQueue;
 import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
@@ -19,7 +17,7 @@ public class CommandLineUpdate
     * 
     * @param args
     *           CL Params are not used
-    * @throws IOException
+    * @throws Exception
     *            if something goes wrong
     */
    public static void main(final String[] args) throws Exception
@@ -31,7 +29,7 @@ public class CommandLineUpdate
    /**
     * Runs the stuff
     * 
-    * @throws IOException
+    * @throws Exception
     *            if something goes wrong
     */
    public void run() throws Exception
