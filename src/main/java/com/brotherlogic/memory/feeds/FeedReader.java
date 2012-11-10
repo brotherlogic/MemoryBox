@@ -30,6 +30,14 @@ public abstract class FeedReader
    public abstract String getUnderlyingRepresentation(Memory mem) throws IOException;
 
    /**
+    * Login to the system if necessary
+    * 
+    * @throws IOException
+    *            If something goes wrong
+    */
+   protected abstract void login() throws IOException;
+
+   /**
     * Probes the feed - returns the latest memory
     * 
     * @return The latest Memory present in the feed
@@ -46,12 +54,16 @@ public abstract class FeedReader
     */
    public void update() throws IOException
    {
+      login();
       Memory mem = probeFeed();
       Memory topDBMem = null;
       if (mem != null)
          topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
 
       logger.log(Level.INFO, "Got " + mem + " and " + topDBMem);
+
+      if (topDBMem != null)
+         logger.log(Level.INFO, "Also: " + topDBMem.isFilled());
 
       // Check on the versions - we may not have got any DB Mems
       if (topDBMem == null)
@@ -60,13 +72,17 @@ public abstract class FeedReader
          updateAllMemories(false);
       else
       {
+         logger.log(Level.INFO, "Top " + topDBMem.getUniqueID() + " and " + mem.getUniqueID());
+         logger.log(Level.INFO, "Top = " + mem);
+         logger.log(Level.INFO, "DBTOP = " + topDBMem);
+
          // Check on the underlying representations
          String retBase = getUnderlyingRepresentation(mem);
          String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);
          if (!retBase.equals(givenBase))
             updateAllMemories(true);
-         else if (mem.getTimestamp() > topDBMem.getTimestamp())
-            updateMemories(topDBMem.getTimestamp());
+         else if (!mem.getUniqueID().equals(topDBMem.getUniqueID()))
+            updateMemories(topDBMem.getUniqueID());
       }
    }
 
@@ -84,10 +100,10 @@ public abstract class FeedReader
    /**
     * Update the memories up to the latest version
     * 
-    * @param timestamp
-    *           The latest time to pull memories up to
+    * @param uid
+    *           The latest memory to pull memories up to
     * @throws IOException
     *            if we can't update the memories
     */
-   public abstract void updateMemories(long timestamp) throws IOException;
+   public abstract void updateMemories(String uid) throws IOException;
 }

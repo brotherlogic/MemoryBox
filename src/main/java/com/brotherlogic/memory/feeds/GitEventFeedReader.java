@@ -2,7 +2,9 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,24 +13,39 @@ import org.json.JSONObject;
 import com.brotherlogic.memory.core.GitMemory;
 import com.brotherlogic.memory.core.Memory;
 
+/**
+ * Reads git events and converts them to memories
+ * 
+ * @author simon
+ * 
+ */
 public class GitEventFeedReader extends JSONFeedReader
 {
-   String username;
+   DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-   public GitEventFeedReader(String user)
+   /** The username to retrieve for */
+   private final String username;
+
+   /**
+    * Constructor
+    * 
+    * @param user
+    *           The name of the user to read
+    */
+   public GitEventFeedReader(final String user)
    {
       username = user;
    }
 
    @Override
-   protected Memory buildMemory(JSONObject obj) throws JSONException
+   protected Memory buildMemory(final JSONObject obj) throws JSONException
    {
       GitMemory mem = new GitMemory();
       mem.setProject(obj.getJSONObject("repo").getString("name"));
       mem.setBranch(obj.getJSONObject("payload").getString("ref"));
       try
       {
-         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-DD'T'HH:mm:ss'Z'");
+         mem.setTimestamp(df.parse(obj.getString("created_at")).getTime());
       }
       catch (ParseException e)
       {
@@ -44,13 +61,20 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(long pagination) throws MalformedURLException
+   protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
       return new URL("https://api.github.com/users/" + username + "/events");
    }
 
    @Override
-   protected long processFeedText(String text) throws JSONException
+   protected void login()
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   protected long processFeedText(final String text) throws JSONException
    {
       JSONArray arr = new JSONArray(text);
 

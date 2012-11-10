@@ -2,9 +2,8 @@ package com.brotherlogic.memory.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract representation of a Memory
@@ -12,28 +11,28 @@ import java.text.SimpleDateFormat;
  * @author simon
  * 
  */
-public abstract class Memory implements Comparable<Memory>
+public abstract class Memory
 {
-   /** Used to process dates */
-   private DateFormat df;
+   /** Used to log output */
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
 
-   /** The underlying timestamp for this memory (is unique) */
+   /** All memories can timestamp */
    private Long timestamp;
 
-   @Override
-   public int compareTo(final Memory o)
-   {
-      return timestamp.compareTo(o.timestamp);
-   }
+   /** A means of identifying the memory in some way */
+   private String uniqueID;
 
    @Override
-   public boolean equals(final Object o)
+   public boolean equals(Object obj)
    {
-      if (!(o instanceof Memory))
+      if (!(obj instanceof Memory))
          return false;
-      Memory other = (Memory) o;
 
-      return other.timestamp.equals(timestamp);
+      if (!obj.getClass().equals(this.getClass()))
+         return false;
+
+      System.out.println(uniqueID + " and " + ((Memory) obj).getUniqueID());
+      return (uniqueID.equals(((Memory) obj).uniqueID));
    }
 
    /**
@@ -46,20 +45,25 @@ public abstract class Memory implements Comparable<Memory>
       return this.getClass().getName();
    }
 
-   /**
-    * Get method for the timestamp
-    * 
-    * @return The time at which this memory occured
-    */
-   public final Long getTimestamp()
+   public Long getTimestamp()
    {
       return timestamp;
+   }
+
+   /**
+    * Get method for the unique ID
+    * 
+    * @return An identifier for the memory
+    */
+   public String getUniqueID()
+   {
+      return uniqueID;
    }
 
    @Override
    public int hashCode()
    {
-      return timestamp.hashCode();
+      return uniqueID.hashCode();
    }
 
    /**
@@ -76,11 +80,16 @@ public abstract class Memory implements Comparable<Memory>
       {
          for (Method meth : this.getClass().getMethods())
             if (meth.getName().startsWith("get") && meth.getParameterTypes().length == 0)
-            {
-               Object obj = meth.invoke(this, new Object[0]);
-               if (obj == null)
-                  allFilled = false;
-            }
+               // Check that this isn't an annotation method
+               if (meth.getAnnotation(Annotation.class) == null)
+               {
+                  Object obj = meth.invoke(this, new Object[0]);
+                  if (obj == null)
+                  {
+                     logger.log(Level.INFO, meth.getName() + " is not filled for " + this);
+                     allFilled = false;
+                  }
+               }
       }
       catch (IllegalAccessException e)
       {
@@ -96,49 +105,25 @@ public abstract class Memory implements Comparable<Memory>
       return allFilled;
    }
 
-   /**
-    * Set method for the timestamp
-    * 
-    * @param value
-    *           The time at which this memory occured
-    */
-   public final void setTimestamp(final Long value)
+   public void setTimestamp(Long timestamp)
    {
-      timestamp = value;
+      this.timestamp = timestamp;
    }
 
    /**
-    * Set method for the timestamp
+    * Set method for the unique ID
     * 
-    * @param value
-    *           The string to parse
-    * @throws ParseException
-    *            If we can't parse the date
+    * @param id
+    *           A String which defines the memory
     */
-   public void setTimestamp(final String value) throws ParseException
+   public void setUniqueID(final String id)
    {
-      if (df == null)
-         df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
-      timestamp = df.parse(value).getTime();
-   }
-
-   /**
-    * Set method for the timestamp
-    * 
-    * @param value
-    *           The string to parse
-    * @throws ParseException
-    *            If we can't parse the date
-    */
-   public void setTimestamp(final String value, String format) throws ParseException
-   {
-      df = new SimpleDateFormat(format);
-      timestamp = df.parse(value).getTime();
+      this.uniqueID = id;
    }
 
    @Override
    public String toString()
    {
-      return "Memory: " + timestamp;
+      return "Memory: " + uniqueID;
    }
 }

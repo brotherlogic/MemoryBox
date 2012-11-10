@@ -3,9 +3,13 @@ package com.brotherlogic.memory.db;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,11 +85,13 @@ public abstract class DownloadQueue implements Runnable
    /** The time to wait before checking the queue */
    private static final int WAIT_TIME = 5000;
 
-   Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DownloadQueue");
+   /** Used to log stuff */
+   private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DownloadQueue");
 
    /** Flag to indicate that we're running */
    private boolean running = true;
 
+   /** Flag indicating we're in the slow stop */
    private boolean slowStop = false;
 
    /**
@@ -111,32 +117,43 @@ public abstract class DownloadQueue implements Runnable
     *           The object to download
     * @throws IOException
     *            if something goes wrong
+    * @return flag indicating we've downloaded something
     */
-   private void doDownload(final Downloadable downloadable) throws IOException
+   private boolean doDownload(final Downloadable downloadable) throws IOException
    {
+      boolean doneDownload = false;
       logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
 
-      // Create the file if necessary
+      // Create the file if necessary - we don't download if the file already
+      // exists
       File f = new File(downloadable.getPathToStore());
       if (!f.exists())
+      {
          if (!f.createNewFile())
             throw new IOException("Cannot create file: " + f.getAbsolutePath());
 
-      BufferedWriter writer = new BufferedWriter(new FileWriter(f));
-      BufferedReader reader = new BufferedReader(new InputStreamReader(downloadable
-            .getDownloadLocation().openStream()));
-      char[] byteBuffer = new char[BUFFER_SIZE];
-      int read = reader.read(byteBuffer);
-      while (read > 0)
-      {
-         writer.write(byteBuffer, 0, read);
-         read = reader.read(byteBuffer);
+         logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
+
+         doneDownload = true;
+
+         BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+         BufferedReader reader = new BufferedReader(new InputStreamReader(downloadable
+               .getDownloadLocation().openStream()));
+         char[] byteBuffer = new char[BUFFER_SIZE];
+         int read = reader.read(byteBuffer);
+         while (read > 0)
+         {
+            writer.write(byteBuffer, 0, read);
+            read = reader.read(byteBuffer);
+         }
+
+         reader.close();
+         writer.close();
       }
 
-      reader.close();
-      writer.close();
-
       removeFromQueue(downloadable);
+
+      return doneDownload;
    }
 
    /**
@@ -148,7 +165,7 @@ public abstract class DownloadQueue implements Runnable
     */
    public String download(final URL url)
    {
-      String location = newFile();
+      String location = newFile(url.toString());
       Downloadable able = new Downloadable();
       able.setDownloadLocation(url);
       able.setPathToStore(location);
@@ -168,9 +185,21 @@ public abstract class DownloadQueue implements Runnable
    /**
     * Build a new file
     * 
+    * @param url
+    *           The URL to build for
+    * 
     * @return The place where the file is stored
     */
-   protected abstract String newFile();
+   protected abstract String newFile(String url);
+
+   /**
+    * Store an arbritary file
+    * 
+    * @param key
+    *           The key to store under
+    * @return The String path to a file where this object can be stored
+    */
+   protected abstract String newStore(String key);
 
    /**
     * Remove an item from the download queue
@@ -180,27 +209,56 @@ public abstract class DownloadQueue implements Runnable
     */
    protected abstract void removeFromQueue(Downloadable dl);
 
+   /**
+    * Retrieve an object from the store
+    * 
+    * @param key
+    *           THe key that defines the object
+    * @return The object itself
+    * @throws IOException
+    *            If we can't process the underlying file for whatever reason
+    */
+   public Object retrieveObject(final String key) throws IOException
+   {
+      try
+      {
+         File f = new File(newStore(key));
+         if (!f.exists())
+            return null;
+         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+         Object o = ois.readObject();
+         ois.close();
+         return o;
+      }
+      catch (ClassNotFoundException e)
+      {
+         throw new IOException(e);
+      }
+   }
+
    @Override
    public void run()
    {
+      boolean wait = true;
       while (running)
       {
          // Wait a bit
-         try
-         {
-            Thread.sleep(WAIT_TIME);
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
+         if (wait)
+            try
+            {
+               Thread.sleep(WAIT_TIME);
+            }
+            catch (InterruptedException e)
+            {
+               e.printStackTrace();
+            }
 
          // Process the next download
          Downloadable next = getFromQueue();
          if (next != null)
             try
             {
-               doDownload(next);
+               wait = doDownload(next);
             }
             catch (IOException e)
             {
@@ -211,6 +269,28 @@ public abstract class DownloadQueue implements Runnable
       }
    }
 
+   /**
+    * Save an object in the storage
+    * 
+    * @param o
+    *           The object to save
+    * @param key
+    *           The key to store under
+    * @throws IOException
+    *            If something goes wrong
+    */
+   public void saveObject(final Object o, final String key) throws IOException
+   {
+      File f = new File(newStore(key));
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+      oos.writeObject(o);
+      oos.close();
+   }
+
+   /**
+    * Slow stops the download queue - i.e. waits until all downloads have been
+    * processed and then stops
+    */
    public void slowStop()
    {
       slowStop = true;

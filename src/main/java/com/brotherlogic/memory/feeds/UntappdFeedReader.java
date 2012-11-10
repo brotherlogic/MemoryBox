@@ -2,7 +2,9 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +24,8 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public class UntappdFeedReader extends JSONFeedReader
 {
+   private static final DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+
    /** Local logger */
    private static Logger logger = Logger
          .getLogger("com.brotherlogic.memory.feeds.UntappdFeedReader");
@@ -49,8 +53,10 @@ public class UntappdFeedReader extends JSONFeedReader
       UntappdMemory mem = new UntappdMemory();
       try
       {
-         mem.setTimestamp(json.getString("created_at"));
+         mem.setTimestamp(df.parse(json.getString("created_at")).getTime());
          mem.setBeerName(json.getJSONObject("beer").getString("beer_name"));
+         mem.setAbv(json.getJSONObject("beer").getDouble("beer_abv"));
+         mem.setBreweryName(json.getJSONObject("brewery").getString("brewery_name"));
 
          // Get the largest image file that this references
          if (json.getJSONObject("media").getJSONArray("items").length() > 0)
@@ -95,6 +101,13 @@ public class UntappdFeedReader extends JSONFeedReader
          urlText += "&max_id=" + pagination;
 
       return new URL(urlText);
+   }
+
+   @Override
+   protected void login()
+   {
+      // TODO Auto-generated method stub
+
    }
 
    @Override

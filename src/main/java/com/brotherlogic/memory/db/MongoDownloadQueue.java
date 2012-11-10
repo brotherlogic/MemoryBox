@@ -11,14 +11,22 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
+/**
+ * Download queue which uses mogno
+ * 
+ * @author simon
+ * 
+ */
 public class MongoDownloadQueue extends DownloadQueue
 {
+   /** used to log events */
    private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoDownloadQueue");
 
-   DBCollection queue;
+   /** The queue we use */
+   private DBCollection queue;
 
    @Override
-   protected void addToQueue(Downloadable dl)
+   protected void addToQueue(final Downloadable dl)
    {
       logger.log(Level.INFO, "Adding " + dl.getDownloadLocation() + " to download queue");
 
@@ -33,6 +41,9 @@ public class MongoDownloadQueue extends DownloadQueue
       logger.log(Level.INFO, "Added " + dl.getDownloadLocation() + " to download queue");
    }
 
+   /**
+    * Connects to the database
+    */
    private void connect()
    {
       if (queue == null)
@@ -73,31 +84,29 @@ public class MongoDownloadQueue extends DownloadQueue
    }
 
    @Override
-   protected String newFile()
+   protected String newFile(final String url)
    {
       if (!new File(System.getProperty("user.home") + "/.memorybox/images").exists())
          new File(System.getProperty("user.home") + "/.memorybox/images").mkdirs();
 
       String base = System.getProperty("user.home") + "/.memorybox/images/";
-      int i = 0;
-      while (new File(base + i + ".image").exists())
-         i++;
 
-      File f = new File(base + i + ".image");
-      try
-      {
-         f.createNewFile();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      return new File(base + i + ".image").getAbsolutePath();
+      return new File(base + url.hashCode() + ".image").getAbsolutePath();
    }
 
    @Override
-   protected void removeFromQueue(Downloadable dl)
+   protected String newStore(final String key)
+   {
+      if (!new File(System.getProperty("user.home") + "/.memorybox/objects").exists())
+         new File(System.getProperty("user.home") + "/.memorybox/objects").mkdirs();
+
+      String base = System.getProperty("user.home") + "/.memorybox/objects/";
+
+      return new File(base + key).getAbsolutePath();
+   }
+
+   @Override
+   protected void removeFromQueue(final Downloadable dl)
    {
       connect();
 

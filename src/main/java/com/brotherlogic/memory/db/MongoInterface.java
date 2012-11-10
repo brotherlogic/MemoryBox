@@ -40,6 +40,7 @@ public class MongoInterface extends DBInterface
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
 
+   /** Used to log output */
    private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoInterface");
 
    /** The underlying database */
@@ -94,6 +95,8 @@ public class MongoInterface extends DBInterface
    public final void enrichMemory(final Memory obj, final ObjectId id,
          final Map<String, Class<?>> properties) throws IOException
    {
+      logger.log(Level.INFO, "Enriching " + obj.getClass() + " with " + properties);
+
       // Ignore the core memory properties!
       Set<Class<?>> classes = new HashSet<Class<?>>(properties.values());
       classes.remove(Memory.class);
@@ -161,15 +164,18 @@ public class MongoInterface extends DBInterface
          DBCollection qCol = getCollection(cls);
          DBObject obj = qCol.findOne(query);
 
+         System.out.println("HERE = " + memoryObj);
+
          if (obj != null)
-            return retrieveMemory((Long) memoryObj.get("timestamp"), cls.getName());
+            return retrieveMemory((String) memoryObj.get("uniqueID"), cls.getName());
       }
 
       return null;
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Calendar day, String className) throws IOException
+   public Collection<Memory> retrieveMemories(final Calendar day, final String className)
+         throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
 
@@ -184,17 +190,20 @@ public class MongoInterface extends DBInterface
       query.add(Calendar.DAY_OF_YEAR, 1);
       long qEnd = query.getTimeInMillis();
 
+      System.out.println(qStart + " to " + qEnd);
+
       DBObject dbquery = new BasicDBObject();
       DBObject filter = new BasicDBObject();
       filter.put("$gt", qStart);
       filter.put("$lt", qEnd);
       dbquery.put("timestamp", filter);
+      dbquery.put("memoryClass", className);
 
       DBCursor res = col.find(dbquery);
       while (res.hasNext())
       {
          DBObject obj = res.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), className));
       }
       res.close();
 
@@ -202,17 +211,17 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Class cls) throws IOException
+   public Collection<Memory> retrieveMemories(final Class<?> cls) throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
       DBCollection col = getCollection(Memory.class);
       DBObject query = new BasicDBObject();
       query.put("memoryClass", cls.getName());
-      DBCursor cursor = col.find();
+      DBCursor cursor = col.find(query);
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), cls.getName()));
       }
       cursor.close();
 
@@ -220,9 +229,9 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public final Memory retrieveMemory(final long timestamp, final String className)
-         throws IOException
+   public final Memory retrieveMemory(final String uid, final String className) throws IOException
    {
+      logger.log(Level.INFO, "Retrieving " + className + " with uid " + uid);
       try
       {
          // Create the given object
@@ -232,11 +241,12 @@ public class MongoInterface extends DBInterface
 
          // Get the ID number
          DBObject query = new BasicDBObject();
-         query.put("timestamp", timestamp);
+         query.put("uniqueID", uid);
          DBObject res = getCollection(Memory.class).findOne(query);
 
          ObjectId id = (ObjectId) res.get("_id");
-         memory.setTimestamp(timestamp);
+         memory.setUniqueID(uid);
+         memory.setTimestamp((Long) res.get("timestamp"));
          Map<String, Class<?>> properties = deriveProperties(memory);
          enrichMemory(memory, id, properties);
          return memory;
@@ -287,6 +297,8 @@ public class MongoInterface extends DBInterface
       query.put(REF_NAME, refId);
       DBObject retObj = getCollection(cls).findOne(query);
 
+      logger.log(Level.INFO, "Found object = " + retObj);
+
       // Match up these properties
       if (retObj != null)
          for (Entry<String, Class<?>> propEntry : properties.entrySet())
@@ -333,6 +345,7 @@ public class MongoInterface extends DBInterface
             return (ObjectId) storedObj.get("_id");
          else
          {
+            // Since we're begin stored add a store timestamp
             col.insert(obj);
             return obj.getObjectId("_id");
          }
@@ -344,7 +357,12 @@ public class MongoInterface extends DBInterface
          refQ.put("ref_id", refId);
          DBObject storedObj = col.findOne(refQ);
          if (storedObj != null)
+         {
+            for (String key : getAnnotatedProps(potProperties))
+               if (storedObj.get(key) != null)
+                  obj.put(key, storedObj.get(key));
             col.update(refQ, obj);
+         }
          else
             col.insert(obj);
          return obj.getObjectId("_id");

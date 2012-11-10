@@ -7,20 +7,59 @@ import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
 
-public class BugFixing extends DBTest
+/**
+ * Test case for fixing bugs
+ * 
+ * @author simon
+ * 
+ */
+public class BugFixingTest extends DBTest
 {
+   /**
+    * Test retrieving stuff from GIT
+    * 
+    * @throws IOException
+    *            if something goes wrong
+    */
+   @Test
+   public void testGitRetrieve() throws IOException
+   {
+      long time = 1325456352000L;
+      String branch = "magic";
+
+      GitMemory mem1 = new GitMemory();
+      mem1.setTimestamp(time);
+      mem1.setBranch(branch);
+      DBFactory.buildInterface().storeMemory(mem1);
+
+      UntappdMemory mem2 = new UntappdMemory();
+      mem2.setAbv(1.2);
+      mem2.setAmount(100);
+      mem2.setBeerName("Blah");
+      mem2.setBreweryName("Donkey");
+      mem2.setTimestamp(time);
+      mem2.setImagePath("blah");
+      DBFactory.buildInterface().storeMemory(mem2);
+
+      GitMemory mem = (GitMemory) DBFactory.buildInterface().retrieveMemory(mem1.getUniqueID(),
+            GitMemory.class.getName());
+      Assert.assertNotNull("Branch is null", mem.getBranch());
+   }
+
    /**
     * Tests that memory additions don't overlap
     * 
     * @throws IOException
+    *            if something goes wrong
     */
    @Test
    public void testMemoryOverlap() throws IOException
    {
-      // Add two memories
+      // Add two memories - this one has an annotated field (amount)
       UntappdMemory mem1 = new UntappdMemory();
       mem1.setTimestamp(10L);
       mem1.setBeerName("Donkey");
+      mem1.setAmount(500);
 
       UntappdMemory mem2 = new UntappdMemory();
       mem2.setTimestamp(10L);
@@ -45,5 +84,9 @@ public class BugFixing extends DBTest
       // Should have added the ABV data
       Assert.assertNotNull("ABV has not been set", ((UntappdMemory) DBFactory.buildInterface()
             .retrieveMemories(UntappdMemory.class).iterator().next()).getAbv());
+
+      // Should have retained the amount information
+      Assert.assertNotNull("Amount has been reset?", ((UntappdMemory) DBFactory.buildInterface()
+            .retrieveMemories(UntappdMemory.class).iterator().next()).getAmount());
    }
 }
