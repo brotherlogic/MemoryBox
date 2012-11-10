@@ -1,8 +1,6 @@
 package com.brotherlogic.memory.core;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,6 +15,12 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public class BugFixingTest extends DBTest
 {
+   /**
+    * Test retrieving stuff from GIT
+    * 
+    * @throws IOException
+    *            if something goes wrong
+    */
    @Test
    public void testGitRetrieve() throws IOException
    {
@@ -37,25 +41,16 @@ public class BugFixingTest extends DBTest
       mem2.setImagePath("blah");
       DBFactory.buildInterface().storeMemory(mem2);
 
-      GitMemory mem = (GitMemory) DBFactory.buildInterface().retrieveMemory(time,
+      GitMemory mem = (GitMemory) DBFactory.buildInterface().retrieveMemory(mem1.getUniqueID(),
             GitMemory.class.getName());
       Assert.assertNotNull("Branch is null", mem.getBranch());
-
-      // Test the calendar retrieve
-      Calendar cal = Calendar.getInstance();
-      cal.setTimeInMillis(time);
-      Collection<Memory> memories = DBFactory.buildInterface().retrieveMemories(cal,
-            GitMemory.class.getName());
-
-      Assert.assertTrue("Mismatch in memory count: " + memories.size(), memories.size() == 1);
-      Assert.assertNotNull("Initial branch is null",
-            ((GitMemory) memories.iterator().next()).getBranch());
    }
 
    /**
     * Tests that memory additions don't overlap
     * 
     * @throws IOException
+    *            if something goes wrong
     */
    @Test
    public void testMemoryOverlap() throws IOException

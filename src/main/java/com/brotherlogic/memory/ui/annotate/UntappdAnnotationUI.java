@@ -20,9 +20,23 @@ import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.core.UntappdMemory;
 import com.brotherlogic.memory.db.DBFactory;
 
+/**
+ * UI for annotated untappd memories
+ * 
+ * @author simon
+ * 
+ */
 public class UntappdAnnotationUI extends JPanel
 {
-   public static void main(String[] args) throws Exception
+   /**
+    * Main method
+    * 
+    * @param args
+    *           no command line arguments are used
+    * @throws Exception
+    *            If something goes wrong
+    */
+   public static void main(final String[] args) throws Exception
    {
       UntappdAnnotationUI anno = new UntappdAnnotationUI();
 
@@ -36,17 +50,26 @@ public class UntappdAnnotationUI extends JPanel
       anno.run();
    }
 
-   JPanel imgPanel;
+   /** The image panel */
+   private JPanel imgPanel;
 
-   JLabel topLabel;
+   /** The label that contains the text */
+   private JLabel topLabel;
 
-   UntappdMemory unannotatedMemory;
+   /** The unannotated memory */
+   private UntappdMemory unannotatedMemory;
 
+   /**
+    * Constructor
+    */
    public UntappdAnnotationUI()
    {
       initGUI();
    }
 
+   /**
+    * Prepares the GUI for use
+    */
    private void initGUI()
    {
       this.setLayout(new BorderLayout());
@@ -63,7 +86,7 @@ public class UntappdAnnotationUI extends JPanel
          }
 
          @Override
-         public void paint(Graphics g)
+         public void paint(final Graphics g)
          {
             super.paint(g);
 
@@ -89,7 +112,7 @@ public class UntappdAnnotationUI extends JPanel
       field.addActionListener(new ActionListener()
       {
          @Override
-         public void actionPerformed(ActionEvent arg0)
+         public void actionPerformed(final ActionEvent arg0)
          {
             if (field.getText().equals("HP"))
                unannotatedMemory.setAmount(284);
@@ -115,6 +138,12 @@ public class UntappdAnnotationUI extends JPanel
       });
    }
 
+   /**
+    * Runs the annotation process
+    * 
+    * @throws IOException
+    *            If something goes wrong
+    */
    public void run() throws IOException
    {
       Collection<Memory> memories = DBFactory.buildInterface()
@@ -127,14 +156,19 @@ public class UntappdAnnotationUI extends JPanel
             return;
          }
          else if (((UntappdMemory) memory).getAmount() == null)
-            System.out
-                  .println("HERE: " + memory.getMemoryClass() + " and " + memory.getTimestamp());
+            System.out.println("HERE: " + memory.getMemoryClass() + " and " + memory.getUniqueID());
 
       // Force quit here
       System.exit(1);
    }
 
-   public void set(UntappdMemory mem)
+   /**
+    * Sets the memory to annotate
+    * 
+    * @param mem
+    *           Valid Untappd unannotated memory
+    */
+   public void set(final UntappdMemory mem)
    {
       unannotatedMemory = mem;
       topLabel.setText(mem.getBreweryName() + " - " + mem.getBeerName());

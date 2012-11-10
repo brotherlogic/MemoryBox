@@ -61,7 +61,15 @@ public abstract class DBInterface
       return strs;
    }
 
-   protected final Collection<String> getAnnotatedProps(Map<String, Class<?>> properties)
+   /**
+    * Get which of the specified properties are annotated properties
+    * 
+    * @param properties
+    *           A {@link Map} between the property name and the underlying class
+    * @return A {@link Collection} of Properties which are annotated rather than
+    *         inherent
+    */
+   protected final Collection<String> getAnnotatedProps(final Map<String, Class<?>> properties)
    {
       Collection<String> props = new LinkedList<String>();
 
@@ -149,23 +157,44 @@ public abstract class DBInterface
     */
    public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
 
+   /**
+    * Retrieve the memories for a given day
+    * 
+    * @param day
+    *           The Calendar representation for the day (time is ignored)
+    * @param className
+    *           The name of Memory classes to retrieve
+    * @return A Collection of memorys of the given class that were made on the
+    *         given day
+    * @throws IOException
+    *            If something goes wrong when we read
+    */
    public abstract Collection<Memory> retrieveMemories(Calendar day, String className)
          throws IOException;
 
-   public abstract Collection<Memory> retrieveMemories(Class className) throws IOException;
+   /**
+    * Retrieve all the memories for the given class
+    * 
+    * @param className
+    *           The Class of memories to retrieve
+    * @return A collection of classes for the given memory
+    * @throws IOException
+    *            If something goes wrong
+    */
+   public abstract Collection<Memory> retrieveMemories(Class<?> className) throws IOException;
 
    /**
     * Retrieve a memory from the database
     * 
-    * @param timestamp
-    *           The timestamp of the memory
+    * @param uid
+    *           The unique ID of the memory
     * @param className
     *           The type of memory to retrieve
     * @return A built memory object
     * @throws IOException
     *            If something goes wrong with the db
     */
-   public abstract Memory retrieveMemory(long timestamp, String className) throws IOException;
+   public abstract Memory retrieveMemory(String uid, String className) throws IOException;
 
    /**
     * Sets a property on a given memory
@@ -219,5 +248,4 @@ public abstract class DBInterface
     *            If there's a db error
     */
    public abstract void storeMemory(final Memory mem) throws IOException;
-
 }

@@ -40,6 +40,7 @@ public class MongoInterface extends DBInterface
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
 
+   /** Used to log output */
    private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoInterface");
 
    /** The underlying database */
@@ -163,15 +164,18 @@ public class MongoInterface extends DBInterface
          DBCollection qCol = getCollection(cls);
          DBObject obj = qCol.findOne(query);
 
+         System.out.println("HERE = " + memoryObj);
+
          if (obj != null)
-            return retrieveMemory((Long) memoryObj.get("timestamp"), cls.getName());
+            return retrieveMemory((String) memoryObj.get("uniqueID"), cls.getName());
       }
 
       return null;
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Calendar day, String className) throws IOException
+   public Collection<Memory> retrieveMemories(final Calendar day, final String className)
+         throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
 
@@ -199,7 +203,7 @@ public class MongoInterface extends DBInterface
       while (res.hasNext())
       {
          DBObject obj = res.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), className));
       }
       res.close();
 
@@ -207,7 +211,7 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public Collection<Memory> retrieveMemories(Class cls) throws IOException
+   public Collection<Memory> retrieveMemories(final Class<?> cls) throws IOException
    {
       Collection<Memory> mems = new LinkedList<Memory>();
       DBCollection col = getCollection(Memory.class);
@@ -217,7 +221,7 @@ public class MongoInterface extends DBInterface
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), cls.getName()));
       }
       cursor.close();
 
@@ -225,9 +229,9 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public final Memory retrieveMemory(final long timestamp, final String className)
-         throws IOException
+   public final Memory retrieveMemory(final String uid, final String className) throws IOException
    {
+      logger.log(Level.INFO, "Retrieving " + className + " with uid " + uid);
       try
       {
          // Create the given object
@@ -237,11 +241,12 @@ public class MongoInterface extends DBInterface
 
          // Get the ID number
          DBObject query = new BasicDBObject();
-         query.put("timestamp", timestamp);
+         query.put("uniqueID", uid);
          DBObject res = getCollection(Memory.class).findOne(query);
 
          ObjectId id = (ObjectId) res.get("_id");
-         memory.setTimestamp(timestamp);
+         memory.setUniqueID(uid);
+         memory.setTimestamp((Long) res.get("timestamp"));
          Map<String, Class<?>> properties = deriveProperties(memory);
          enrichMemory(memory, id, properties);
          return memory;
@@ -340,6 +345,7 @@ public class MongoInterface extends DBInterface
             return (ObjectId) storedObj.get("_id");
          else
          {
+            // Since we're begin stored add a store timestamp
             col.insert(obj);
             return obj.getObjectId("_id");
          }

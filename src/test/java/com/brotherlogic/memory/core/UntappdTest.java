@@ -30,13 +30,15 @@ public class UntappdTest
       UntappdMemory untapd = new UntappdMemory();
       untapd.setTimestamp(12345L);
       untapd.setImagePath("/usr/blah/void/");
+      untapd.setUniqueID("uid1");
 
       // Store it in the given DB
       DBInterface db = DBFactory.buildInterface();
       db.storeMemory(untapd);
 
       // Retrieve it
-      UntappdMemory mem = (UntappdMemory) db.retrieveMemory(12345L, untapd.getClass().getName());
+      UntappdMemory mem = (UntappdMemory) db.retrieveMemory(untapd.getUniqueID(), untapd.getClass()
+            .getName());
       Assert.assertTrue("Stored object does not match the object we stored!", untapd.equals(mem));
    }
 }
