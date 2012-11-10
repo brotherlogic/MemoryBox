@@ -30,6 +30,7 @@ public class UntappdTest
       UntappdMemory untapd = new UntappdMemory();
       untapd.setTimestamp(12345L);
       untapd.setImagePath("/usr/blah/void/");
+      untapd.setUniqueID("uid1");
 
       // Store it in the given DB
       DBInterface db = DBFactory.buildInterface();

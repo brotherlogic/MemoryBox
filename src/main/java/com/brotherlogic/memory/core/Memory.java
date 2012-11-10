@@ -22,6 +22,19 @@ public abstract class Memory
    /** A means of identifying the memory in some way */
    private String uniqueID;
 
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (!(obj instanceof Memory))
+         return false;
+
+      if (!obj.getClass().equals(this.getClass()))
+         return false;
+
+      System.out.println(uniqueID + " and " + ((Memory) obj).getUniqueID());
+      return (uniqueID.equals(((Memory) obj).uniqueID));
+   }
+
    /**
     * Get method for the memory class
     * 
