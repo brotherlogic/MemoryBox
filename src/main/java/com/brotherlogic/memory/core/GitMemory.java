@@ -6,16 +6,13 @@ package com.brotherlogic.memory.core;
  * @author simon
  * 
  */
-public class GitMemory extends Memory implements TimedMemory
+public class GitMemory extends Memory
 {
    /** The branch to which we checked in */
    private String branch;
 
    /** The project we checked in on */
    private String project;
-
-   /** The time of creation of this thingy */
-   private Long time;
 
    /**
     * Get method for branch
@@ -35,12 +32,6 @@ public class GitMemory extends Memory implements TimedMemory
    public String getProject()
    {
       return project;
-   }
-
-   @Override
-   public Long getTimestamp()
-   {
-      return time;
    }
 
    /**
@@ -63,15 +54,6 @@ public class GitMemory extends Memory implements TimedMemory
    public void setProject(final String prject)
    {
       this.project = prject;
-   }
-
-   @Override
-   public void setTimestamp(final Long timestamp)
-   {
-      time = timestamp;
-
-      // Convert the time into the unique id
-      setUniqueID(timestamp.hashCode() + "");
    }
 
    @Override

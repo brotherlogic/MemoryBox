@@ -3,6 +3,7 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -149,7 +150,7 @@ public class MongoInterface extends DBInterface
       // Have to work our way through the memories to find the first match; -1
       // means descending order
       DBObject querysort = new BasicDBObject();
-      querysort.put("_timestamp", -1);
+      querysort.put("timestamp", -1);
       DBCollection col = getCollection(Memory.class);
       DBCursor cursor = col.find(new BasicDBObject()).sort(querysort);
       while (cursor.hasNext())
@@ -168,6 +169,43 @@ public class MongoInterface extends DBInterface
       }
 
       return null;
+   }
+
+   @Override
+   public Collection<Memory> retrieveMemories(final Calendar day, final String className)
+         throws IOException
+   {
+      Collection<Memory> mems = new LinkedList<Memory>();
+
+      DBCollection col = getCollection(Memory.class);
+      Calendar query = Calendar.getInstance();
+      query.setTimeInMillis(day.getTimeInMillis());
+      query.set(Calendar.HOUR, 0);
+      query.set(Calendar.MINUTE, 0);
+      query.set(Calendar.SECOND, 0);
+
+      long qStart = query.getTimeInMillis();
+      query.add(Calendar.DAY_OF_YEAR, 1);
+      long qEnd = query.getTimeInMillis();
+
+      System.out.println(qStart + " to " + qEnd);
+
+      DBObject dbquery = new BasicDBObject();
+      DBObject filter = new BasicDBObject();
+      filter.put("$gt", qStart);
+      filter.put("$lt", qEnd);
+      dbquery.put("timestamp", filter);
+      dbquery.put("memoryClass", className);
+
+      DBCursor res = col.find(dbquery);
+      while (res.hasNext())
+      {
+         DBObject obj = res.next();
+         mems.add(retrieveMemory((String) obj.get("uid"), className));
+      }
+      res.close();
+
+      return mems;
    }
 
    @Override
@@ -304,7 +342,6 @@ public class MongoInterface extends DBInterface
          else
          {
             // Since we're begin stored add a store timestamp
-            obj.put("_timestamp", System.currentTimeMillis());
             col.insert(obj);
             return obj.getObjectId("_id");
          }

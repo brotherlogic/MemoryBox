@@ -16,6 +16,9 @@ public abstract class Memory
    /** Used to log output */
    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
+   /** All memories can timestamp */
+   private Long timestamp;
+
    /** A means of identifying the memory in some way */
    private String uniqueID;
 
@@ -27,6 +30,11 @@ public abstract class Memory
    public String getMemoryClass()
    {
       return this.getClass().getName();
+   }
+
+   public Long getTimestamp()
+   {
+      return timestamp;
    }
 
    /**
@@ -82,6 +90,11 @@ public abstract class Memory
       }
 
       return allFilled;
+   }
+
+   public void setTimestamp(Long timestamp)
+   {
+      this.timestamp = timestamp;
    }
 
    /**

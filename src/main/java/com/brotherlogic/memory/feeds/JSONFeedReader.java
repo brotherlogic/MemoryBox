@@ -222,7 +222,7 @@ public abstract class JSONFeedReader extends FeedReader
    }
 
    @Override
-   public void updateMemories(final long timestamp) throws IOException
+   public void updateMemories(final String uid) throws IOException
    {
       try
       {
@@ -236,7 +236,7 @@ public abstract class JSONFeedReader extends FeedReader
             String feedText = read(getFeedURL(pagination));
             long nextPage = processFeedText(feedText);
             for (Memory obj : popReadObjects())
-               if ((obj).getTimestamp() > timestamp)
+               if (!obj.getUniqueID().equals(uid))
                   objects.add(obj);
                else
                   timestampOver = true;
