@@ -2,7 +2,7 @@ package com.brotherlogic.memory;
 
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DownloadQueue;
-import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
+import com.brotherlogic.memory.feeds.GitEventFeedReader;
 
 /**
  * Test bed for updating the database from the command line
@@ -42,11 +42,11 @@ public class CommandLineUpdate
       // UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
       // reader.update();
 
-      // GitEventFeedReader reader2 = new GitEventFeedReader("brotherlogic");
-      // reader2.update();
+      GitEventFeedReader reader2 = new GitEventFeedReader("brotherlogic");
+      reader2.update();
 
-      DiscogsFeedReader dfr = new DiscogsFeedReader();
-      dfr.update();
+      // DiscogsFeedReader dfr = new DiscogsFeedReader();
+      // dfr.update();
 
       queue.slowStop();
    }
