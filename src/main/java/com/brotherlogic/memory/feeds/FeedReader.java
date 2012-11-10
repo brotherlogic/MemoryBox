@@ -72,7 +72,7 @@ public abstract class FeedReader
          updateAllMemories(false);
       else
       {
-         logger.log(Level.INFO, "Top " + topDBMem.getTimestamp() + " and " + mem.getTimestamp());
+         logger.log(Level.INFO, "Top " + topDBMem.getUniqueID() + " and " + mem.getUniqueID());
          logger.log(Level.INFO, "Top = " + mem);
          logger.log(Level.INFO, "DBTOP = " + topDBMem);
 
@@ -81,8 +81,8 @@ public abstract class FeedReader
          String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);
          if (!retBase.equals(givenBase))
             updateAllMemories(true);
-         else if (mem.getTimestamp() > topDBMem.getTimestamp())
-            updateMemories(topDBMem.getTimestamp());
+         else if (!mem.getUniqueID().equals(topDBMem.getUniqueID()))
+            updateMemories(topDBMem.getUniqueID());
       }
    }
 
@@ -100,10 +100,10 @@ public abstract class FeedReader
    /**
     * Update the memories up to the latest version
     * 
-    * @param timestamp
-    *           The latest time to pull memories up to
+    * @param uid
+    *           The latest memory to pull memories up to
     * @throws IOException
     *            if we can't update the memories
     */
-   public abstract void updateMemories(long timestamp) throws IOException;
+   public abstract void updateMemories(String uid) throws IOException;
 }

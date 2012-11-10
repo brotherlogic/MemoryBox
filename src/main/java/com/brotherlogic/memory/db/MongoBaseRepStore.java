@@ -43,7 +43,7 @@ public class MongoBaseRepStore extends BaseRepStore
 
       BasicDBObject query = new BasicDBObject();
       query.put("memtype", mem.getClass().getName());
-      query.put("time", mem.getTimestamp());
+      query.put("uid", mem.getUniqueID());
 
       DBObject cursor = baseCollection.findOne(query);
 
@@ -76,7 +76,7 @@ public class MongoBaseRepStore extends BaseRepStore
 
       BasicDBObject store = new BasicDBObject();
       store.put("memtype", mem.getClass().getName());
-      store.put("time", mem.getTimestamp());
+      store.put("uid", mem.getUniqueID());
       store.put("baserep", baseRep);
 
       baseCollection.insert(store);

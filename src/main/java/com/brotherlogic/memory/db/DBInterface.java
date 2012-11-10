@@ -186,15 +186,15 @@ public abstract class DBInterface
    /**
     * Retrieve a memory from the database
     * 
-    * @param timestamp
-    *           The timestamp of the memory
+    * @param uid
+    *           The unique ID of the memory
     * @param className
     *           The type of memory to retrieve
     * @return A built memory object
     * @throws IOException
     *            If something goes wrong with the db
     */
-   public abstract Memory retrieveMemory(long timestamp, String className) throws IOException;
+   public abstract Memory retrieveMemory(String uid, String className) throws IOException;
 
    /**
     * Sets a property on a given memory
@@ -248,5 +248,4 @@ public abstract class DBInterface
     *            If there's a db error
     */
    public abstract void storeMemory(final Memory mem) throws IOException;
-
 }

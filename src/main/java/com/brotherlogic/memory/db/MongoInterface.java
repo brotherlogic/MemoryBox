@@ -164,8 +164,10 @@ public class MongoInterface extends DBInterface
          DBCollection qCol = getCollection(cls);
          DBObject obj = qCol.findOne(query);
 
+         System.out.println("HERE = " + memoryObj);
+
          if (obj != null)
-            return retrieveMemory((Long) memoryObj.get("timestamp"), cls.getName());
+            return retrieveMemory((String) memoryObj.get("uniqueID"), cls.getName());
       }
 
       return null;
@@ -201,7 +203,7 @@ public class MongoInterface extends DBInterface
       while (res.hasNext())
       {
          DBObject obj = res.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), className));
       }
       res.close();
 
@@ -219,7 +221,7 @@ public class MongoInterface extends DBInterface
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+         mems.add(retrieveMemory((String) obj.get("uniqueID"), cls.getName()));
       }
       cursor.close();
 
@@ -227,9 +229,9 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public final Memory retrieveMemory(final long timestamp, final String className)
-         throws IOException
+   public final Memory retrieveMemory(final String uid, final String className) throws IOException
    {
+      logger.log(Level.INFO, "Retrieving " + className + " with uid " + uid);
       try
       {
          // Create the given object
@@ -239,11 +241,12 @@ public class MongoInterface extends DBInterface
 
          // Get the ID number
          DBObject query = new BasicDBObject();
-         query.put("timestamp", timestamp);
+         query.put("uniqueID", uid);
          DBObject res = getCollection(Memory.class).findOne(query);
 
          ObjectId id = (ObjectId) res.get("_id");
-         memory.setTimestamp(timestamp);
+         memory.setUniqueID(uid);
+         memory.setTimestamp((Long) res.get("timestamp"));
          Map<String, Class<?>> properties = deriveProperties(memory);
          enrichMemory(memory, id, properties);
          return memory;
@@ -342,6 +345,7 @@ public class MongoInterface extends DBInterface
             return (ObjectId) storedObj.get("_id");
          else
          {
+            // Since we're begin stored add a store timestamp
             col.insert(obj);
             return obj.getObjectId("_id");
          }
