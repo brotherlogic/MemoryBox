@@ -3,7 +3,6 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -158,21 +157,6 @@ public abstract class DBInterface
    public abstract Memory retrieveLatestMemory(Class<?> cls) throws IOException;
 
    /**
-    * Retrieve the memories for a given day
-    * 
-    * @param day
-    *           The Calendar representation for the day (time is ignored)
-    * @param className
-    *           The name of Memory classes to retrieve
-    * @return A Collection of memorys of the given class that were made on the
-    *         given day
-    * @throws IOException
-    *            If something goes wrong when we read
-    */
-   public abstract Collection<Memory> retrieveMemories(Calendar day, String className)
-         throws IOException;
-
-   /**
     * Retrieve all the memories for the given class
     * 
     * @param className
@@ -186,15 +170,15 @@ public abstract class DBInterface
    /**
     * Retrieve a memory from the database
     * 
-    * @param timestamp
-    *           The timestamp of the memory
+    * @param uid
+    *           The unique ID of the memory
     * @param className
     *           The type of memory to retrieve
     * @return A built memory object
     * @throws IOException
     *            If something goes wrong with the db
     */
-   public abstract Memory retrieveMemory(long timestamp, String className) throws IOException;
+   public abstract Memory retrieveMemory(String uid, String className) throws IOException;
 
    /**
     * Sets a property on a given memory

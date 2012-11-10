@@ -8,7 +8,7 @@ import java.io.File;
  * @author simon
  * 
  */
-public class UntappdMemory extends Memory implements ImageMemory
+public class UntappdMemory extends Memory implements ImageMemory, TimedMemory
 {
    /** The ABV of the beer */
    private Double abv;
@@ -24,6 +24,9 @@ public class UntappdMemory extends Memory implements ImageMemory
 
    /** The path to the image */
    private File imageFile = new File("");
+
+   /** The at which we drunk the thing */
+   private Long timestamp;
 
    @Override
    public boolean equals(final Object o)
@@ -86,6 +89,12 @@ public class UntappdMemory extends Memory implements ImageMemory
    }
 
    @Override
+   public Long getTimestamp()
+   {
+      return timestamp;
+   }
+
+   @Override
    public int hashCode()
    {
       return super.hashCode() + imageFile.hashCode();
@@ -140,6 +149,13 @@ public class UntappdMemory extends Memory implements ImageMemory
    public void setImagePath(final String filePath)
    {
       imageFile = new File(filePath);
+   }
+
+   @Override
+   public void setTimestamp(Long time)
+   {
+      // TODO Auto-generated method stub
+      timestamp = time;
    }
 
    @Override

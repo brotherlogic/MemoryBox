@@ -3,7 +3,6 @@ package com.brotherlogic.memory.db;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -150,7 +149,7 @@ public class MongoInterface extends DBInterface
       // Have to work our way through the memories to find the first match; -1
       // means descending order
       DBObject querysort = new BasicDBObject();
-      querysort.put("timestamp", -1);
+      querysort.put("_timestamp", -1);
       DBCollection col = getCollection(Memory.class);
       DBCursor cursor = col.find(new BasicDBObject()).sort(querysort);
       while (cursor.hasNext())
@@ -165,47 +164,10 @@ public class MongoInterface extends DBInterface
          DBObject obj = qCol.findOne(query);
 
          if (obj != null)
-            return retrieveMemory((Long) memoryObj.get("timestamp"), cls.getName());
+            return retrieveMemory((String) memoryObj.get("uid"), cls.getName());
       }
 
       return null;
-   }
-
-   @Override
-   public Collection<Memory> retrieveMemories(final Calendar day, final String className)
-         throws IOException
-   {
-      Collection<Memory> mems = new LinkedList<Memory>();
-
-      DBCollection col = getCollection(Memory.class);
-      Calendar query = Calendar.getInstance();
-      query.setTimeInMillis(day.getTimeInMillis());
-      query.set(Calendar.HOUR, 0);
-      query.set(Calendar.MINUTE, 0);
-      query.set(Calendar.SECOND, 0);
-
-      long qStart = query.getTimeInMillis();
-      query.add(Calendar.DAY_OF_YEAR, 1);
-      long qEnd = query.getTimeInMillis();
-
-      System.out.println(qStart + " to " + qEnd);
-
-      DBObject dbquery = new BasicDBObject();
-      DBObject filter = new BasicDBObject();
-      filter.put("$gt", qStart);
-      filter.put("$lt", qEnd);
-      dbquery.put("timestamp", filter);
-      dbquery.put("memoryClass", className);
-
-      DBCursor res = col.find(dbquery);
-      while (res.hasNext())
-      {
-         DBObject obj = res.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), className));
-      }
-      res.close();
-
-      return mems;
    }
 
    @Override
@@ -219,7 +181,7 @@ public class MongoInterface extends DBInterface
       while (cursor.hasNext())
       {
          DBObject obj = cursor.next();
-         mems.add(retrieveMemory((Long) obj.get("timestamp"), cls.getName()));
+         mems.add(retrieveMemory((String) obj.get("uid"), cls.getName()));
       }
       cursor.close();
 
@@ -227,8 +189,7 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public final Memory retrieveMemory(final long timestamp, final String className)
-         throws IOException
+   public final Memory retrieveMemory(final String uid, final String className) throws IOException
    {
       try
       {
@@ -239,11 +200,11 @@ public class MongoInterface extends DBInterface
 
          // Get the ID number
          DBObject query = new BasicDBObject();
-         query.put("timestamp", timestamp);
+         query.put("uid", uid);
          DBObject res = getCollection(Memory.class).findOne(query);
 
          ObjectId id = (ObjectId) res.get("_id");
-         memory.setTimestamp(timestamp);
+         memory.setUniqueID(uid);
          Map<String, Class<?>> properties = deriveProperties(memory);
          enrichMemory(memory, id, properties);
          return memory;
@@ -342,6 +303,8 @@ public class MongoInterface extends DBInterface
             return (ObjectId) storedObj.get("_id");
          else
          {
+            // Since we're begin stored add a store timestamp
+            obj.put("_timestamp", System.currentTimeMillis());
             col.insert(obj);
             return obj.getObjectId("_id");
          }

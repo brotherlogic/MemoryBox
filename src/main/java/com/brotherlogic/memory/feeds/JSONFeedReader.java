@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +143,6 @@ public abstract class JSONFeedReader extends FeedReader
          List<Memory> memorys = new LinkedList<Memory>();
          for (Memory con : cons)
             memorys.add(con);
-         Collections.sort(memorys);
          return memorys.get(0);
       }
       catch (JSONException e)

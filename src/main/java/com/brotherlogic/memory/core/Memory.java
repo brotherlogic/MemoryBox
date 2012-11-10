@@ -2,9 +2,6 @@ package com.brotherlogic.memory.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,32 +11,13 @@ import java.util.logging.Logger;
  * @author simon
  * 
  */
-public abstract class Memory implements Comparable<Memory>
+public abstract class Memory
 {
-   /** Used to process dates */
-   private DateFormat df;
-
    /** Used to log output */
    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
-   /** The underlying timestamp for this memory (is unique) */
-   private Long timestamp;
-
-   @Override
-   public int compareTo(final Memory o)
-   {
-      return -timestamp.compareTo(o.timestamp);
-   }
-
-   @Override
-   public boolean equals(final Object o)
-   {
-      if (!(o instanceof Memory))
-         return false;
-      Memory other = (Memory) o;
-
-      return other.timestamp.equals(timestamp);
-   }
+   /** A means of identifying the memory in some way */
+   private String uniqueID;
 
    /**
     * Get method for the memory class
@@ -52,19 +30,19 @@ public abstract class Memory implements Comparable<Memory>
    }
 
    /**
-    * Get method for the timestamp
+    * Get method for the unique ID
     * 
-    * @return The time at which this memory occured
+    * @return An identifier for the memory
     */
-   public final Long getTimestamp()
+   public String getUniqueID()
    {
-      return timestamp;
+      return uniqueID;
    }
 
    @Override
    public int hashCode()
    {
-      return timestamp.hashCode();
+      return uniqueID.hashCode();
    }
 
    /**
@@ -107,50 +85,19 @@ public abstract class Memory implements Comparable<Memory>
    }
 
    /**
-    * Set method for the timestamp
+    * Set method for the unique ID
     * 
-    * @param value
-    *           The time at which this memory occured
+    * @param id
+    *           A String which defines the memory
     */
-   public final void setTimestamp(final Long value)
+   public void setUniqueID(final String id)
    {
-      timestamp = value;
-   }
-
-   /**
-    * Set method for the timestamp
-    * 
-    * @param value
-    *           The string to parse
-    * @throws ParseException
-    *            If we can't parse the date
-    */
-   public void setTimestamp(final String value) throws ParseException
-   {
-      if (df == null)
-         df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
-      timestamp = df.parse(value).getTime();
-   }
-
-   /**
-    * Set method for the timestamp
-    * 
-    * @param value
-    *           The string to parse
-    * @param format
-    *           this format to parse
-    * @throws ParseException
-    *            If we can't parse the date
-    */
-   public void setTimestamp(final String value, final String format) throws ParseException
-   {
-      df = new SimpleDateFormat(format);
-      timestamp = df.parse(value).getTime();
+      this.uniqueID = id;
    }
 
    @Override
    public String toString()
    {
-      return "Memory: " + timestamp;
+      return "Memory: " + uniqueID;
    }
 }
