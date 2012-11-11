@@ -47,7 +47,9 @@ public abstract class JSONFeedReader extends FeedReader
     */
    protected void addObjectToRead(final Memory cons, final String rep)
    {
+      logger.log(Level.INFO, "Adding to base rep cache " + cons + " andalso " + rep);
       baseRepCache.put(cons, rep);
+      logger.log(Level.INFO, "Adding to read");
       readObjects.add(cons);
    }
 
@@ -137,12 +139,16 @@ public abstract class JSONFeedReader extends FeedReader
    @Override
    public Memory probeFeed() throws IOException
    {
+      logger.log(Level.INFO, "Probing Feed");
       try
       {
+         login();
          Collection<Memory> cons = gatherObjects(1);
+         logger.log(Level.INFO, "Objects gathered");
          List<Memory> memorys = new LinkedList<Memory>();
          for (Memory con : cons)
             memorys.add(con);
+         logger.log(Level.INFO, "Probe Done");
          return memorys.get(0);
       }
       catch (JSONException e)
@@ -181,6 +187,7 @@ public abstract class JSONFeedReader extends FeedReader
          readText.append(line);
       reader.close();
 
+      logger.log(Level.INFO, "Done Reading");
       return readText.toString();
    }
 
