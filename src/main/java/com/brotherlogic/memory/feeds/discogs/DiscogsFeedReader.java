@@ -42,13 +42,40 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected Memory buildMemory(final JSONObject json) throws JSONException
    {
-      DiscogsMemory mem = new DiscogsMemory();
-      String artistString = "";
-      JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
-      for (int i = 0; i < artArr.length(); i++)
-         artistString += artArr.getJSONObject(i).getString("name");
-      mem.setArtist(artistString);
-      return mem;
+      try
+      {
+         DiscogsMemory mem = new DiscogsMemory();
+         String artistString = "";
+         JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
+         mem.setUniqueID(json.getString("id"));
+         System.out.println(json);
+         mem.setImagePath(DBFactory
+               .buildInterface()
+               .getDownloadQueue()
+               .download(
+                     new URL(convertImage(json.getJSONObject("basic_information")
+                           .getString("thumb")))));
+         for (int i = 0; i < artArr.length(); i++)
+            artistString += artArr.getJSONObject(i).getString("name");
+         mem.setArtist(artistString);
+         return mem;
+      }
+      catch (MalformedURLException e)
+      {
+         throw new JSONException(e);
+      }
+   }
+
+   /**
+    * Converts a discogs image url into a full sized representation
+    * 
+    * @param url
+    * @return
+    */
+   private String convertImage(String url)
+   {
+      String[] elems = url.split("-");
+      return elems[0] + "-" + elems[2] + "-" + elems[3];
    }
 
    @Override
@@ -111,6 +138,7 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected String read(final URL urlToRead)
    {
+      System.out.println("Service = " + service);
       OAuthRequest request = new OAuthRequest(Verb.GET, urlToRead.toString());
       service.signRequest(accessToken, request);
       System.out.println("REQUEST = " + request.getSanitizedUrl());

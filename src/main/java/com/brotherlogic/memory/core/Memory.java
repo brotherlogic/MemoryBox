@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  * @author simon
  * 
  */
-public abstract class Memory
+public abstract class Memory implements Comparable<Memory>
 {
    /** Used to log output */
    private final Logger logger = Logger.getLogger(this.getClass().getName());
@@ -21,6 +21,15 @@ public abstract class Memory
 
    /** A means of identifying the memory in some way */
    private String uniqueID;
+
+   @Override
+   public int compareTo(Memory o)
+   {
+      if (timestamp != null)
+         return timestamp.compareTo(o.timestamp);
+      else
+         return uniqueID.compareTo(o.uniqueID);
+   }
 
    @Override
    public boolean equals(Object obj)
@@ -86,7 +95,7 @@ public abstract class Memory
                   Object obj = meth.invoke(this, new Object[0]);
                   if (obj == null)
                   {
-                     logger.log(Level.INFO, meth.getName() + " is not filled for " + this);
+                     logger.log(Level.WARNING, meth.getName() + " is not filled for " + this);
                      allFilled = false;
                   }
                }
