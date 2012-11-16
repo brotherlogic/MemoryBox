@@ -24,14 +24,15 @@ import com.brotherlogic.memory.db.DBFactory;
  */
 public class UntappdFeedReader extends JSONFeedReader
 {
-   private static final DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
-
    /** Local logger */
    private static Logger logger = Logger
          .getLogger("com.brotherlogic.memory.feeds.UntappdFeedReader");
 
    /** The base URL for accessing the feed */
    private final String baseURL = "http://api.untappd.com/v4";
+
+   /** Date format for the untappd feed reader */
+   private final DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
    /** The user name to pull the feed for */
    private final String username;
