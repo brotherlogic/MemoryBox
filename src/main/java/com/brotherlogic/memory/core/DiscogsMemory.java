@@ -30,6 +30,14 @@ public class DiscogsMemory extends Memory implements ImageMemory
       return imagePath;
    }
 
+   @Override
+   @Annotation
+   public Long getTimestamp()
+   {
+      // TODO Auto-generated method stub
+      return super.getTimestamp();
+   }
+
    /**
     * Set method for artist
     * 
