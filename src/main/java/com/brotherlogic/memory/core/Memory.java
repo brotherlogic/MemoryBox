@@ -23,7 +23,7 @@ public abstract class Memory implements Comparable<Memory>
    private String uniqueID;
 
    @Override
-   public int compareTo(Memory o)
+   public int compareTo(final Memory o)
    {
       if (timestamp != null)
          return timestamp.compareTo(o.timestamp);
@@ -32,7 +32,7 @@ public abstract class Memory implements Comparable<Memory>
    }
 
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(final Object obj)
    {
       if (!(obj instanceof Memory))
          return false;
@@ -54,6 +54,11 @@ public abstract class Memory implements Comparable<Memory>
       return this.getClass().getName();
    }
 
+   /**
+    * Get method for timestamp
+    * 
+    * @return The time at which the memory was created
+    */
    public Long getTimestamp()
    {
       return timestamp;
@@ -114,9 +119,15 @@ public abstract class Memory implements Comparable<Memory>
       return allFilled;
    }
 
-   public void setTimestamp(Long timestamp)
+   /**
+    * Set method for timestamp
+    * 
+    * @param time
+    *           The time the memory was created
+    */
+   public void setTimestamp(final Long time)
    {
-      this.timestamp = timestamp;
+      this.timestamp = time;
    }
 
    /**

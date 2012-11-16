@@ -3,15 +3,25 @@ package com.brotherlogic.memory.core;
 import java.io.IOException;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import com.brotherlogic.memory.feeds.GitEventFeedReader;
 import com.brotherlogic.memory.feeds.UntappdFeedReader;
 import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
 
+/**
+ * Tests that we can access the relevant feeds
+ * 
+ * @author simon
+ * 
+ */
 public class FeedTest extends DBTest
 {
-   @Test
+   /**
+    * Tests that we can reach the discogs feed
+    * 
+    * @throws IOException
+    *            if something goes wrong
+    */
    public void testDiscogsFeed() throws IOException
    {
       DiscogsMemory mem = (DiscogsMemory) new DiscogsFeedReader().probeFeed();
@@ -21,7 +31,12 @@ public class FeedTest extends DBTest
       System.out.println(mem.getUniqueID());
    }
 
-   @Test
+   /**
+    * Tests that we can read the git feed
+    * 
+    * @throws IOException
+    *            if something goes wrong
+    */
    public void testGitFeed() throws IOException
    {
       GitMemory mem = (GitMemory) new GitEventFeedReader("brotherlogic").probeFeed();
@@ -31,7 +46,12 @@ public class FeedTest extends DBTest
       System.out.println(mem.getUniqueID());
    }
 
-   @Test
+   /**
+    * Tests that we can reach the untappd feed
+    * 
+    * @throws IOException
+    *            If something goes wrong
+    */
    public void testUntappdFeed() throws IOException
    {
       UntappdMemory mem = (UntappdMemory) new UntappdFeedReader("brotherlogic").probeFeed();

@@ -23,9 +23,11 @@ import com.brotherlogic.memory.core.Memory;
  */
 public class GitEventFeedReader extends JSONFeedReader
 {
-   DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+   /** Date format for the git JSON */
+   private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-   Logger logger = Logger.getLogger(this.getClassName());
+   /** The logger we use in this class */
+   private final Logger logger = Logger.getLogger(this.getClassName());
 
    /** The username to retrieve for */
    private final String username;
