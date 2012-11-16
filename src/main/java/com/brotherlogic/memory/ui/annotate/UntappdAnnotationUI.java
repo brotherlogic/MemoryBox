@@ -156,8 +156,7 @@ public class UntappdAnnotationUI extends JPanel
             return;
          }
          else if (((UntappdMemory) memory).getAmount() == null)
-            System.out
-                  .println("HERE: " + memory.getMemoryClass() + " and " + memory.getTimestamp());
+            System.out.println("HERE: " + memory.getMemoryClass() + " and " + memory.getUniqueID());
 
       // Force quit here
       System.exit(1);

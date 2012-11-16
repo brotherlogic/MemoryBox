@@ -26,7 +26,8 @@ public class BasicTest extends DBTest
       Assert.assertFalse("Memory is filled when it isn't", mem.isFilled());
 
       // Fill the memory
-      mem.setTimestamp(10L);
+      mem.setUniqueID("blah");
+      mem.setTimestamp(100L);
 
       // This should now pass
       Assert.assertTrue("Memory is indicating it isn't filled", mem.isFilled());

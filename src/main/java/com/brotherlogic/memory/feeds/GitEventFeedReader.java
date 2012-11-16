@@ -2,7 +2,9 @@ package com.brotherlogic.memory.feeds;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +21,8 @@ import com.brotherlogic.memory.core.Memory;
  */
 public class GitEventFeedReader extends JSONFeedReader
 {
+   DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
    /** The username to retrieve for */
    private final String username;
 
@@ -41,7 +45,7 @@ public class GitEventFeedReader extends JSONFeedReader
       mem.setBranch(obj.getJSONObject("payload").getString("ref"));
       try
       {
-         mem.setTimestamp(obj.getString("created_at"), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+         mem.setTimestamp(df.parse(obj.getString("created_at")).getTime());
       }
       catch (ParseException e)
       {

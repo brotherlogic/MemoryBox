@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +143,6 @@ public abstract class JSONFeedReader extends FeedReader
          List<Memory> memorys = new LinkedList<Memory>();
          for (Memory con : cons)
             memorys.add(con);
-         Collections.sort(memorys);
          return memorys.get(0);
       }
       catch (JSONException e)
@@ -224,7 +222,7 @@ public abstract class JSONFeedReader extends FeedReader
    }
 
    @Override
-   public void updateMemories(final long timestamp) throws IOException
+   public void updateMemories(final String uid) throws IOException
    {
       try
       {
@@ -238,7 +236,7 @@ public abstract class JSONFeedReader extends FeedReader
             String feedText = read(getFeedURL(pagination));
             long nextPage = processFeedText(feedText);
             for (Memory obj : popReadObjects())
-               if ((obj).getTimestamp() > timestamp)
+               if (!obj.getUniqueID().equals(uid))
                   objects.add(obj);
                else
                   timestampOver = true;

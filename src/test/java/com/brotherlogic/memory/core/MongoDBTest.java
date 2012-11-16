@@ -29,10 +29,13 @@ public class MongoDBTest extends DBTest
       memory.setImagePath("/blah");
       memory.setTimestamp(10L);
       memory.setBeerName("IPA");
+      memory.setBreweryName("Magic");
+      memory.setUniqueID("uid1");
       DBFactory.buildInterface().storeMemory(memory);
 
       // Check that the latest memory is this one
       Memory mem = DBFactory.buildInterface().retrieveLatestMemory(UntappdMemory.class);
+      Assert.assertNotNull("No object retrieved", mem);
       Assert.assertEquals("Stored object not retrieved", memory, mem);
 
       // Store a different memory
@@ -40,6 +43,7 @@ public class MongoDBTest extends DBTest
       discogs.setImagePath("/blah2");
       discogs.setTimestamp(5L);
       discogs.setArtist("David Bowie");
+      discogs.setUniqueID("uid2");
       DBFactory.buildInterface().storeMemory(discogs);
 
       // Check that we can retrieve both the latest versions
@@ -53,6 +57,7 @@ public class MongoDBTest extends DBTest
       untappd2.setImagePath("/blah3");
       untappd2.setTimestamp(14L);
       untappd2.setBeerName("IPA");
+      untappd2.setUniqueID("uid3");
       DBFactory.buildInterface().storeMemory(untappd2);
 
       // We should now get the newer one

@@ -25,19 +25,6 @@ public class UntappdMemory extends Memory implements ImageMemory
    /** The path to the image */
    private File imageFile = new File("");
 
-   @Override
-   public boolean equals(final Object o)
-   {
-      if (!(o instanceof UntappdMemory))
-         return false;
-      UntappdMemory other = (UntappdMemory) o;
-
-      if (!other.imageFile.equals(imageFile))
-         return false;
-
-      return super.equals(o);
-   }
-
    /**
     * Get method for the abv
     * 
