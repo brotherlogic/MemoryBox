@@ -70,9 +70,10 @@ public class DiscogsFeedReader extends JSONFeedReader
     * Converts a discogs image url into a full sized representation
     * 
     * @param url
-    * @return
+    *           The url to convert
+    * @return The name of the resolved url
     */
-   private String convertImage(String url)
+   private String convertImage(final String url)
    {
       String[] elems = url.split("-");
       return elems[0] + "-" + elems[2] + "-" + elems[3];
