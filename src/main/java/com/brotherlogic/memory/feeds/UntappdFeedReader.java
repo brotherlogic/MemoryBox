@@ -96,8 +96,10 @@ public class UntappdFeedReader extends JSONFeedReader
       String urlText = baseURL + "/user/checkins/" + username;
 
       // Add in the client and secret stuff
-      urlText += "?client_secret=" + Config.getParameter("untappd.secret") + "&client_id="
-            + Config.getParameter("untappd.id");
+      urlText += "?client_secret="
+            + Config.getConfig("http://edip:8085/configstore/").getParameter("untappd.secret")
+            + "&client_id="
+            + Config.getConfig("http://edip:8085/configstore/").getParameter("untappd.id");
 
       if (pagination > 0)
          urlText += "&max_id=" + pagination;

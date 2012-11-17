@@ -10,7 +10,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11-beta-1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
 
@@ -19,6 +19,13 @@
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
       <version>2.9.3</version>
+    </dependency>
+
+    <!-- For doing PUT/GET -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0-alpha4</version>
     </dependency>
 
     <!-- For handling JSON -->
