@@ -94,14 +94,20 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected void login() throws IOException
    {
-      service = new ServiceBuilder().provider(DiscogsAPI.class)
-            .apiKey(Config.getParameter("discogs.key"))
-            .apiSecret(Config.getParameter("discogs.secret")).build();
+      service = new ServiceBuilder()
+            .provider(DiscogsAPI.class)
+            .apiKey(Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.key"))
+            .apiSecret(
+                  Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.secret"))
+            .build();
+
+      System.out.println("HERE");
 
       try
       {
-         Object o = DBFactory.buildInterface().getDownloadQueue()
-               .retrieveObject("discogs.accessToken");
+         Object o = Config.getConfig("http://edip:8085/configstore/").retrieveObject(
+               "discogs.accessToken");
+         System.out.println(o);
          if (o == null)
          {
             Scanner in = new Scanner(System.in);
@@ -110,8 +116,8 @@ public class DiscogsFeedReader extends JSONFeedReader
             Verifier verifier = new Verifier(in.nextLine());
             accessToken = service.getAccessToken(requestToken, verifier);
 
-            DBFactory.buildInterface().getDownloadQueue()
-                  .saveObject(accessToken, "discogs.accessToken");
+            Config.getConfig("http://edip:8085/configstore/").storeObject("discogs.accessToken",
+                  accessToken);
          }
          else
             accessToken = (Token) o;

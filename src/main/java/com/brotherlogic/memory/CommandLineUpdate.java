@@ -42,10 +42,10 @@ public class CommandLineUpdate
       downloadThread.start();
 
       UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
-      reader.update();
+      // reader.update();
 
       GitEventFeedReader reader2 = new GitEventFeedReader("brotherlogic");
-      reader2.update();
+      // reader2.update();
 
       DiscogsFeedReader dfr = new DiscogsFeedReader();
       dfr.update();
