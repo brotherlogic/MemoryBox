@@ -54,6 +54,7 @@ public abstract class FeedReader
     */
    public void update() throws IOException
    {
+      logger.log(Level.INFO, "Logging in");
       login();
       Memory mem = probeFeed();
       Memory topDBMem = null;
