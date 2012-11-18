@@ -103,17 +103,17 @@ public class ImageCalendarPane extends CalendarPane
 
                   double scaleFactor = (imgWidth + 0.0) / (width / multiplier);
                   if (imgHeight > imgWidth || width > height)
-                     scaleFactor = imgHeight / (height / multiplier);
+                     scaleFactor = (imgHeight + 0.0) / (height / multiplier);
                   int rwidth = (int) (imgWidth / scaleFactor);
                   int rheight = (int) (imgHeight / scaleFactor);
 
                   // Resize the image to fit
-                  g.drawImage(img, x + row * (width / multiplier), y + col * (height / multiplier),
-                        rwidth, rheight, Color.white, null);
+                  Image img2 = img.getScaledInstance(rwidth, rheight, Image.SCALE_SMOOTH);
+                  g.drawImage(img2, x + row * (width / multiplier),
+                        y + col * (height / multiplier), rwidth, rheight, Color.white, null);
                   count++;
                }
          }
-
       }
       catch (IOException e)
       {
