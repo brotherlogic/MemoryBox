@@ -118,10 +118,24 @@ public class MongoInterface extends DBInterface
 
       BasicDBObject toInsert = new BasicDBObject();
       toInsert.put("memory_class", memToFollow.getName());
-      toInsert.put("memory_reader", memoryReader.getName());
-      toInsert.put("reader_param", param);
 
-      col.insert(toInsert);
+      // Count the number of existing memorys
+      DBObject curr = col.findOne(toInsert);
+
+      if (curr != null)
+      {
+         BasicDBObject newObj = new BasicDBObject();
+         newObj.put("memory_class", memToFollow.getName());
+         newObj.put("memory_reader", memoryReader.getName());
+         newObj.put("reader_param", param);
+         col.update(toInsert, newObj);
+      }
+      else
+      {
+         toInsert.put("memory_reader", memoryReader.getName());
+         toInsert.put("reader_param", param);
+         col.insert(toInsert);
+      }
    }
 
    /**

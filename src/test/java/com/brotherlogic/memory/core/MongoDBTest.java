@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.brotherlogic.memory.db.DBFactory;
-import com.brotherlogic.memory.db.DBInterface;
 import com.brotherlogic.memory.db.MongoInterface;
 import com.brotherlogic.memory.feeds.FeedReader;
 import com.brotherlogic.memory.feeds.GitEventFeedReader;
@@ -73,12 +72,15 @@ public class MongoDBTest extends DBTest
    @Test
    public void testReaderStoreAndRetrieve() throws IOException
    {
-      DBInterface inter = new MongoInterface();
+      MongoInterface inter = new MongoInterface();
       inter.followMemory(GitMemory.class, GitEventFeedReader.class, "brotherlogic");
       Collection<FeedReader> readers = inter.getMemoryReaders();
 
       Assert.assertEquals("Not enough readers returned", readers.size(), 1);
       Assert.assertEquals("Wrong reader class", readers.iterator().next().getClass(),
             GitEventFeedReader.class);
+
+      inter.followMemory(GitMemory.class, GitEventFeedReader.class, "brotherlogic");
+      Assert.assertEquals("Overwriting memory readers", inter.getMemoryReaders().size(), 1);
    }
 }

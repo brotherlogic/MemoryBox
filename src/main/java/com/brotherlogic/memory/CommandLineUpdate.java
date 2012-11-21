@@ -1,10 +1,10 @@
 package com.brotherlogic.memory;
 
+import com.brotherlogic.memory.core.UntappdMemory;
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DownloadQueue;
-import com.brotherlogic.memory.feeds.GitEventFeedReader;
+import com.brotherlogic.memory.feeds.FeedReader;
 import com.brotherlogic.memory.feeds.UntappdFeedReader;
-import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
 
 /**
  * Test bed for updating the database from the command line
@@ -41,14 +41,12 @@ public class CommandLineUpdate
       Thread downloadThread = new Thread(queue);
       downloadThread.start();
 
-      UntappdFeedReader reader = new UntappdFeedReader("brotherlogic");
-      // reader.update();
+      // Add the untapped reader
+      DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
+            "brotherlogic");
 
-      GitEventFeedReader reader2 = new GitEventFeedReader("brotherlogic");
-      // reader2.update();
-
-      DiscogsFeedReader dfr = new DiscogsFeedReader();
-      dfr.update();
+      for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
+         reader.update();
 
       queue.slowStop();
    }
