@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Annotation;
 import com.brotherlogic.memory.core.Memory;
+import com.brotherlogic.memory.feeds.FeedReader;
 
 /**
  * Abstract class for dealing with the database
@@ -61,6 +62,9 @@ public abstract class DBInterface
       return strs;
    }
 
+   public abstract void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
+         throws IOException;
+
    /**
     * Get which of the specified properties are annotated properties
     * 
@@ -96,6 +100,8 @@ public abstract class DBInterface
     * @return a valid Download Queue
     */
    public abstract DownloadQueue getDownloadQueue();
+
+   public abstract Collection<FeedReader> getMemoryReaders() throws IOException;
 
    /**
     * Gets a value for a given property
