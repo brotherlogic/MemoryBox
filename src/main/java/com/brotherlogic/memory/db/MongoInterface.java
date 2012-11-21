@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import org.bson.types.ObjectId;
 
 import com.brotherlogic.memory.core.Memory;
+import com.brotherlogic.memory.feeds.FeedReader;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -36,6 +37,9 @@ public class MongoInterface extends DBInterface
 
    /** The test database */
    private static final String DB_NAME_TEST = "memorybox_test";
+
+   /** The table to store following data */
+   private static final String MEMORY_ADMIN_TABLE = "memory_admin";
 
    /** The field name for setting references */
    private static final String REF_NAME = "ref_id";
@@ -105,6 +109,35 @@ public class MongoInterface extends DBInterface
 
    }
 
+   @Override
+   public void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
+         throws IOException
+   {
+      connect();
+      DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
+
+      BasicDBObject toInsert = new BasicDBObject();
+      toInsert.put("memory_class", memToFollow.getName());
+
+      // Count the number of existing memorys
+      DBObject curr = col.findOne(toInsert);
+
+      if (curr != null)
+      {
+         BasicDBObject newObj = new BasicDBObject();
+         newObj.put("memory_class", memToFollow.getName());
+         newObj.put("memory_reader", memoryReader.getName());
+         newObj.put("reader_param", param);
+         col.update(toInsert, newObj);
+      }
+      else
+      {
+         toInsert.put("memory_reader", memoryReader.getName());
+         toInsert.put("reader_param", param);
+         col.insert(toInsert);
+      }
+   }
+
    /**
     * Gets the collection for a given class
     * 
@@ -142,6 +175,41 @@ public class MongoInterface extends DBInterface
    public DownloadQueue getDownloadQueue()
    {
       return new MongoDownloadQueue();
+   }
+
+   @Override
+   public Collection<FeedReader> getMemoryReaders() throws IOException
+   {
+      connect();
+      DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
+      Collection<FeedReader> readers = new LinkedList<FeedReader>();
+
+      DBCursor cursor = col.find();
+      while (cursor.hasNext())
+      {
+         DBObject curr = cursor.next();
+         try
+         {
+            Class<?> reader = Class.forName((String) curr.get("memory_reader"));
+            String params = (String) curr.get("reader_param");
+
+            Constructor<?> cons;
+            if (params != null)
+               cons = reader.getConstructor(String.class);
+            else
+               cons = reader.getConstructor();
+            if (params != null)
+               readers.add((FeedReader) cons.newInstance(params));
+            else
+               readers.add((FeedReader) cons.newInstance());
+         }
+         catch (Exception e)
+         {
+            throw new IOException(e);
+         }
+      }
+
+      return readers;
    }
 
    @Override
