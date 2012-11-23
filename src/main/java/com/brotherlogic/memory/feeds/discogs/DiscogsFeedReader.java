@@ -45,8 +45,6 @@ public class DiscogsFeedReader extends JSONFeedReader
       try
       {
          DiscogsMemory mem = new DiscogsMemory();
-         String artistString = "";
-         JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
          mem.setUniqueID(json.getString("id"));
          System.out.println(json);
          mem.setImagePath(DBFactory
@@ -55,9 +53,16 @@ public class DiscogsFeedReader extends JSONFeedReader
                .download(
                      new URL(convertImage(json.getJSONObject("basic_information")
                            .getString("thumb")))));
+
+         String artistString = "";
+         JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
          for (int i = 0; i < artArr.length(); i++)
             artistString += artArr.getJSONObject(i).getString("name");
          mem.setArtist(artistString);
+
+         mem.setTitle(json.getJSONObject("basic_information").getString("title"));
+         mem.setReleaseYear(json.getJSONObject("basic_information").getInt("year"));
+
          return mem;
       }
       catch (MalformedURLException e)

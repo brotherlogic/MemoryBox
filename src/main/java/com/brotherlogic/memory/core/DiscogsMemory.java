@@ -14,6 +14,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
    /** The path to the given image file */
    private String imagePath;
 
+   private double releaseOrder;
+
+   private int releaseYear;
+
+   private String title;
+
    /**
     * Get method for artist
     * 
@@ -30,12 +36,28 @@ public class DiscogsMemory extends Memory implements ImageMemory
       return imagePath;
    }
 
+   @Annotation
+   public double getReleaseOrder()
+   {
+      return releaseOrder;
+   }
+
+   public int getReleaseYear()
+   {
+      return releaseYear;
+   }
+
    @Override
    @Annotation
    public Long getTimestamp()
    {
       // TODO Auto-generated method stub
       return super.getTimestamp();
+   }
+
+   public String getTitle()
+   {
+      return title;
    }
 
    /**
@@ -53,5 +75,20 @@ public class DiscogsMemory extends Memory implements ImageMemory
    public void setImagePath(final String path)
    {
       imagePath = path;
+   }
+
+   public void setReleaseOrder(double releaseOrder)
+   {
+      this.releaseOrder = releaseOrder;
+   }
+
+   public void setReleaseYear(int releaseYear)
+   {
+      this.releaseYear = releaseYear;
+   }
+
+   public void setTitle(String title)
+   {
+      this.title = title;
    }
 }
