@@ -110,8 +110,8 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
-         throws IOException
+   public void followMemory(final Class<?> memToFollow, final Class<?> memoryReader,
+         final String param) throws IOException
    {
       connect();
       DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
