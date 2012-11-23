@@ -19,33 +19,58 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+/**
+ * Central place for handling configuration
+ * 
+ * @author simon
+ * 
+ */
 public final class Config
 {
+   /** Singleton represetnation */
    private static Config singleton;
 
-   public static Config getConfig(String baseAddresss)
+   /**
+    * Static method for getting config
+    * 
+    * @param baseAddresss
+    *           The base address for accessing the config server
+    * @return A valid Config system
+    */
+   public static Config getConfig(final String baseAddresss)
    {
       if (singleton == null)
          singleton = new Config(baseAddresss);
       return singleton;
    }
 
-   public static void main(String[] args) throws IOException
-   {
-      File f = new File("etc/config.txt");
-      Config.getConfig("http://edip:8085/configstore/").loadConfig(f);
-   }
+   /** THe base address of the config server */
+   private final String baseAddress;
 
-   String baseAddress;
+   /** The http client used for accessing web content */
+   private final DefaultHttpClient httpClient = new DefaultHttpClient();
 
-   DefaultHttpClient httpClient = new DefaultHttpClient();
-
-   private Config(String base)
+   /**
+    * Blocking constructor
+    * 
+    * @param base
+    *           The base address of the config server
+    */
+   private Config(final String base)
    {
       baseAddress = base;
    }
 
-   private byte[] get(String key) throws IOException
+   /**
+    * Gets the byte array for a given key
+    * 
+    * @param key
+    *           THe key to access
+    * @return The byte[] array
+    * @throws IOException
+    *            if something goes wrong
+    */
+   private byte[] get(final String key) throws IOException
    {
       try
       {
@@ -79,7 +104,14 @@ public final class Config
       }
    }
 
-   public String getParameter(String key)
+   /**
+    * Gets a string result from a given parameter
+    * 
+    * @param key
+    *           The key to retrieve
+    * @return The value represented by this key or null
+    */
+   public String getParameter(final String key)
    {
       try
       {
@@ -91,7 +123,15 @@ public final class Config
       }
    }
 
-   public void loadConfig(File f) throws IOException
+   /**
+    * Loads a config file into the server
+    * 
+    * @param f
+    *           The file to load
+    * @throws IOException
+    *            If something goes wrong in accessing the server
+    */
+   public void loadConfig(final File f) throws IOException
    {
       BufferedReader reader = new BufferedReader(new FileReader(f));
       for (String line = reader.readLine(); line != null; line = reader.readLine())
@@ -102,7 +142,16 @@ public final class Config
       reader.close();
    }
 
-   public Object retrieveObject(String key) throws IOException
+   /**
+    * Gets an object from the config system
+    * 
+    * @param key
+    *           THe key to retrieve on
+    * @return A valid object that the key represents
+    * @throws IOException
+    *            If something goes wrong reading
+    */
+   public Object retrieveObject(final String key) throws IOException
    {
       try
       {
@@ -122,7 +171,15 @@ public final class Config
       }
    }
 
-   public void setParameter(String key, String value)
+   /**
+    * Sets a parameter within the config system
+    * 
+    * @param key
+    *           The key to store the value under
+    * @param value
+    *           The value to be stored
+    */
+   public void setParameter(final String key, final String value)
    {
       try
       {
@@ -134,7 +191,17 @@ public final class Config
       }
    }
 
-   private void store(String key, byte[] value) throws IOException
+   /**
+    * Stores a byte array in the config sytem
+    * 
+    * @param key
+    *           The key to retrieve from
+    * @param value
+    *           The byte array value to store
+    * @throws IOException
+    *            If something goes wrong
+    */
+   private void store(final String key, final byte[] value) throws IOException
    {
       try
       {
@@ -153,7 +220,17 @@ public final class Config
       }
    }
 
-   public void storeObject(String key, Object o) throws IOException
+   /**
+    * Stores an object within the config system
+    * 
+    * @param key
+    *           The key to store
+    * @param o
+    *           The object to store
+    * @throws IOException
+    *            If we can't reach the config serer
+    */
+   public void storeObject(final String key, final Object o) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ObjectOutputStream oos = new ObjectOutputStream(baos);

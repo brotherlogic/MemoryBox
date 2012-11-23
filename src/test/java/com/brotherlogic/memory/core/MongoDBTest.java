@@ -69,6 +69,12 @@ public class MongoDBTest extends DBTest
             .retrieveLatestMemory(UntappdMemory.class));
    }
 
+   /**
+    * Tests that we can store and retrieve a reader
+    * 
+    * @throws IOException
+    *            If something goes wrong
+    */
    @Test
    public void testReaderStoreAndRetrieve() throws IOException
    {

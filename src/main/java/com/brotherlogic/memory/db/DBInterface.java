@@ -62,6 +62,18 @@ public abstract class DBInterface
       return strs;
    }
 
+   /**
+    * Registers that we are following a given memory
+    * 
+    * @param memToFollow
+    *           The type of memory to follow
+    * @param memoryReader
+    *           The reader that can update and process the memeory
+    * @param param
+    *           A paramter passed to the constructor of the reader class
+    * @throws IOException
+    *            If something goes wrong
+    */
    public abstract void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
          throws IOException;
 
@@ -101,6 +113,13 @@ public abstract class DBInterface
     */
    public abstract DownloadQueue getDownloadQueue();
 
+   /**
+    * Gets all the memory readers present in the system
+    * 
+    * @return A {@link Collection} of {@link FeedReader}s
+    * @throws IOException
+    *            If we can't access the database
+    */
    public abstract Collection<FeedReader> getMemoryReaders() throws IOException;
 
    /**
