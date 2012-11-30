@@ -8,7 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -146,8 +148,17 @@ public class UntappdAnnotationUI extends JPanel
     */
    public void run() throws IOException
    {
-      Collection<Memory> memories = DBFactory.buildInterface()
-            .retrieveMemories(UntappdMemory.class);
+      LinkedList<Memory> memories = new LinkedList<Memory>(DBFactory.buildInterface()
+            .retrieveMemories(UntappdMemory.class));
+      Collections.sort(memories, new Comparator<Memory>()
+      {
+         @Override
+         public int compare(Memory o1, Memory o2)
+         {
+            return o1.compareTo(o2);
+         }
+      });
+
       for (Memory memory : memories)
          if (((UntappdMemory) memory).getAmount() == null
                && ((UntappdMemory) memory).getBeerName() != null)
