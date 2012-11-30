@@ -14,11 +14,42 @@ public class DiscogsMemory extends Memory implements ImageMemory
    /** The path to the given image file */
    private String imagePath;
 
-   private double releaseOrder;
+   private Double releaseOrder;
 
-   private int releaseYear;
+   private Integer releaseYear;
 
    private String title;
+
+   @Override
+   public int compareTo(final Memory mem)
+   {
+      if (!(mem instanceof DiscogsMemory))
+         return super.compareTo(mem);
+      DiscogsMemory o = (DiscogsMemory) mem;
+
+      if (artist != null && o.artist != null)
+      {
+         int artComp = artist.compareTo(o.artist);
+         if (artComp != 0)
+            return artComp;
+      }
+
+      if (releaseYear != null && o.releaseYear != null)
+      {
+         int yearComp = releaseYear.compareTo(o.releaseYear);
+         if (yearComp != 0)
+            return yearComp;
+      }
+
+      if (releaseOrder != null && o.releaseOrder != null)
+      {
+         int orderComp = releaseOrder.compareTo(o.releaseOrder);
+         if (orderComp != 0)
+            return orderComp;
+      }
+
+      return title.compareTo(o.title);
+   }
 
    /**
     * Get method for artist
@@ -37,12 +68,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
    }
 
    @Annotation
-   public double getReleaseOrder()
+   public Double getReleaseOrder()
    {
       return releaseOrder;
    }
 
-   public int getReleaseYear()
+   public Integer getReleaseYear()
    {
       return releaseYear;
    }
@@ -77,12 +108,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
       imagePath = path;
    }
 
-   public void setReleaseOrder(double releaseOrder)
+   public void setReleaseOrder(Double releaseOrder)
    {
       this.releaseOrder = releaseOrder;
    }
 
-   public void setReleaseYear(int releaseYear)
+   public void setReleaseYear(Integer releaseYear)
    {
       this.releaseYear = releaseYear;
    }

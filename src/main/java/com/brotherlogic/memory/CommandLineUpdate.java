@@ -24,10 +24,8 @@ public class CommandLineUpdate
     * 
     * @param args
     *           CL Params are not used
-    * @throws Exception
-    *            if something goes wrong
     */
-   public static void main(final String[] args) throws Exception
+   public static void main(final String[] args)
    {
       CommandLineUpdate clu = new CommandLineUpdate();
       clu.run();
@@ -42,22 +40,32 @@ public class CommandLineUpdate
     * @throws Exception
     *            if something goes wrong
     */
-   public void run() throws Exception
+   public void run()
    {
       // Start up the download queue
       DownloadQueue queue = DBFactory.buildInterface().getDownloadQueue();
       Thread downloadThread = new Thread(queue);
       downloadThread.start();
 
-      // Add the things we want
-      logger.log(Level.INFO, "Adding memory classes");
-      DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
-            "brotherlogic");
-      DBFactory.buildInterface().followMemory(DiscogsMemory.class, DiscogsFeedReader.class, "");
+      try
+      {
+         // Add the things we want
+         logger.log(Level.INFO, "Adding memory classes");
+         DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
+               "brotherlogic");
+         DBFactory.buildInterface().followMemory(DiscogsMemory.class, DiscogsFeedReader.class, "");
 
-      logger.log(Level.INFO, "Updating readers");
-      for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
-         reader.update();
+         logger.log(Level.INFO, "Updating readers");
+         for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
+         {
+            logger.log(Level.INFO, "Starting Update " + reader.getClass());
+            reader.update();
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       queue.slowStop();
    }

@@ -200,14 +200,19 @@ public class MongoInterface extends DBInterface
             logger.log(Level.INFO, "Getting constructor: " + params);
 
             Constructor<?> cons;
-            if (params != null)
+            if (params != null && params.length() > 0)
+            {
+               logger.log(Level.INFO, "Getting parameter constructor");
                cons = reader.getConstructor(String.class);
+            }
             else
+            {
+               logger.log(Level.INFO, "Getting no parameter constructor");
                cons = reader.getConstructor();
-
+            }
             logger.log(Level.INFO, "Got reader - now constructing");
 
-            if (params != null)
+            if (params != null && params.length() > 0)
                readers.add((FeedReader) cons.newInstance(params));
             else
                readers.add((FeedReader) cons.newInstance());
@@ -410,7 +415,8 @@ public class MongoInterface extends DBInterface
 
       for (Entry<String, Class<?>> prop : potProperties.entrySet())
          if (prop.getValue().equals(storeType))
-            obj.put(prop.getKey(), getObject(prop.getKey(), toStore));
+            if (getObject(prop.getKey(), toStore) != null)
+               obj.put(prop.getKey(), getObject(prop.getKey(), toStore));
 
       // Add the reference id if this isn't the base object
       if (refId != null)

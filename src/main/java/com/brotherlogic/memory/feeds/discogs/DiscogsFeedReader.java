@@ -67,6 +67,7 @@ public class DiscogsFeedReader extends JSONFeedReader
 
          mem.setTitle(json.getJSONObject("basic_information").getString("title"));
          mem.setReleaseYear(json.getJSONObject("basic_information").getInt("year"));
+         mem.setUniqueID(json.getString("id"));
 
          return mem;
       }
@@ -81,10 +82,12 @@ public class DiscogsFeedReader extends JSONFeedReader
     * 
     * @param url
     *           The url to convert
-    * @return The name of the resolved url
+    * @return The name of the resolved url or null if a null string was passed
+    *         in
     */
    private String convertImage(final String url)
    {
+      logger.log(Level.INFO, "Converting " + url);
       String[] elems = url.split("-");
       return elems[0] + "-" + elems[2] + "-" + elems[3];
    }
