@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +37,9 @@ public class DiscogsFeedReader extends JSONFeedReader
 {
    /** THe access token generated in oauth */
    private Token accessToken;
+
+   /** Logger used for logging */
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
 
    /** The OAuth service used to pull URLS */
    private OAuthService service;
@@ -99,14 +104,14 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected void login() throws IOException
    {
+      logger.log(Level.INFO, "Discogs log in");
+
       service = new ServiceBuilder()
             .provider(DiscogsAPI.class)
             .apiKey(Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.key"))
             .apiSecret(
                   Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.secret"))
             .build();
-
-      System.out.println("HERE");
 
       try
       {
