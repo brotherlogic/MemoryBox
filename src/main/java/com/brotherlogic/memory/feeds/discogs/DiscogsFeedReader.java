@@ -38,7 +38,8 @@ public class DiscogsFeedReader extends JSONFeedReader
    /** THe access token generated in oauth */
    private Token accessToken;
 
-   Logger logger = Logger.getLogger(this.getClass().getName());
+   /** Logger used for logging */
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
 
    /** The OAuth service used to pull URLS */
    private OAuthService service;
