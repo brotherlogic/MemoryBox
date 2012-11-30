@@ -180,6 +180,8 @@ public class MongoInterface extends DBInterface
    @Override
    public Collection<FeedReader> getMemoryReaders() throws IOException
    {
+      logger.log(Level.INFO, "Getting readers");
+
       connect();
       DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
       Collection<FeedReader> readers = new LinkedList<FeedReader>();
@@ -187,17 +189,24 @@ public class MongoInterface extends DBInterface
       DBCursor cursor = col.find();
       while (cursor.hasNext())
       {
+         logger.log(Level.INFO, "Proc");
          DBObject curr = cursor.next();
          try
          {
+            logger.log(Level.INFO, "Building constructor");
             Class<?> reader = Class.forName((String) curr.get("memory_reader"));
             String params = (String) curr.get("reader_param");
+
+            logger.log(Level.INFO, "Getting constructor: " + params);
 
             Constructor<?> cons;
             if (params != null)
                cons = reader.getConstructor(String.class);
             else
                cons = reader.getConstructor();
+
+            logger.log(Level.INFO, "Got reader - now constructing");
+
             if (params != null)
                readers.add((FeedReader) cons.newInstance(params));
             else
@@ -208,6 +217,8 @@ public class MongoInterface extends DBInterface
             throw new IOException(e);
          }
       }
+
+      logger.log(Level.INFO, "Done getting readers");
 
       return readers;
    }
