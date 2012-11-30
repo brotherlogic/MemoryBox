@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Annotation;
+import com.brotherlogic.memory.core.DiscogsMemory;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.feeds.FeedReader;
 
@@ -26,6 +27,12 @@ public abstract class DBInterface
 {
    /** The logger to display output */
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DBInterface");
+
+   public static void main(String[] args)
+   {
+      DiscogsMemory mem = new DiscogsMemory();
+      System.out.println(mem.getReleaseOrder());
+   }
 
    /**
     * Wipes the database
@@ -140,7 +147,9 @@ public abstract class DBInterface
          Method meth = obj.getClass()
                .getMethod("get" + property.substring(0, 1).toUpperCase() + property.substring(1),
                      new Class[0]);
+         logger.log(Level.INFO, "Invoking " + meth + " on " + obj.getClass());
          Object retValue = meth.invoke(obj, new Object[0]);
+         logger.log(Level.INFO, "Got: " + retValue);
          return retValue;
       }
       catch (NoSuchMethodException e)
