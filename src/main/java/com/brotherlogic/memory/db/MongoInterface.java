@@ -110,8 +110,8 @@ public class MongoInterface extends DBInterface
    }
 
    @Override
-   public void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
-         throws IOException
+   public void followMemory(final Class<?> memToFollow, final Class<?> memoryReader,
+         final String param) throws IOException
    {
       connect();
       DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
@@ -180,6 +180,8 @@ public class MongoInterface extends DBInterface
    @Override
    public Collection<FeedReader> getMemoryReaders() throws IOException
    {
+      logger.log(Level.INFO, "Getting readers");
+
       connect();
       DBCollection col = mongo.getCollection(MEMORY_ADMIN_TABLE);
       Collection<FeedReader> readers = new LinkedList<FeedReader>();
@@ -187,18 +189,30 @@ public class MongoInterface extends DBInterface
       DBCursor cursor = col.find();
       while (cursor.hasNext())
       {
+         logger.log(Level.INFO, "Proc");
          DBObject curr = cursor.next();
          try
          {
+            logger.log(Level.INFO, "Building constructor");
             Class<?> reader = Class.forName((String) curr.get("memory_reader"));
             String params = (String) curr.get("reader_param");
 
+            logger.log(Level.INFO, "Getting constructor: " + params);
+
             Constructor<?> cons;
-            if (params != null)
+            if (params != null && params.length() > 0)
+            {
+               logger.log(Level.INFO, "Getting parameter constructor");
                cons = reader.getConstructor(String.class);
+            }
             else
+            {
+               logger.log(Level.INFO, "Getting no parameter constructor");
                cons = reader.getConstructor();
-            if (params != null)
+            }
+            logger.log(Level.INFO, "Got reader - now constructing");
+
+            if (params != null && params.length() > 0)
                readers.add((FeedReader) cons.newInstance(params));
             else
                readers.add((FeedReader) cons.newInstance());
@@ -208,6 +222,8 @@ public class MongoInterface extends DBInterface
             throw new IOException(e);
          }
       }
+
+      logger.log(Level.INFO, "Done getting readers");
 
       return readers;
    }
@@ -399,7 +415,8 @@ public class MongoInterface extends DBInterface
 
       for (Entry<String, Class<?>> prop : potProperties.entrySet())
          if (prop.getValue().equals(storeType))
-            obj.put(prop.getKey(), getObject(prop.getKey(), toStore));
+            if (getObject(prop.getKey(), toStore) != null)
+               obj.put(prop.getKey(), getObject(prop.getKey(), toStore));
 
       // Add the reference id if this isn't the base object
       if (refId != null)

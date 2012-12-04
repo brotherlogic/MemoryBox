@@ -16,7 +16,7 @@ import com.brotherlogic.memory.db.DBFactory;
 public abstract class FeedReader
 {
    /** The logger to be used */
-   private static Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.FeedReader");
+   private final Logger logger = Logger.getLogger("com.brotherlogic.memory.feeds.FeedReader");
 
    /**
     * Gets the underlying representation for this object

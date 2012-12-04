@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Annotation;
+import com.brotherlogic.memory.core.DiscogsMemory;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.feeds.FeedReader;
 
@@ -26,6 +27,12 @@ public abstract class DBInterface
 {
    /** The logger to display output */
    private static Logger logger = Logger.getLogger("com.brotherlogic.memory.db.DBInterface");
+
+   public static void main(String[] args)
+   {
+      DiscogsMemory mem = new DiscogsMemory();
+      System.out.println(mem.getReleaseOrder());
+   }
 
    /**
     * Wipes the database
@@ -62,6 +69,18 @@ public abstract class DBInterface
       return strs;
    }
 
+   /**
+    * Registers that we are following a given memory
+    * 
+    * @param memToFollow
+    *           The type of memory to follow
+    * @param memoryReader
+    *           The reader that can update and process the memeory
+    * @param param
+    *           A paramter passed to the constructor of the reader class
+    * @throws IOException
+    *            If something goes wrong
+    */
    public abstract void followMemory(Class<?> memToFollow, Class<?> memoryReader, String param)
          throws IOException;
 
@@ -101,6 +120,13 @@ public abstract class DBInterface
     */
    public abstract DownloadQueue getDownloadQueue();
 
+   /**
+    * Gets all the memory readers present in the system
+    * 
+    * @return A {@link Collection} of {@link FeedReader}s
+    * @throws IOException
+    *            If we can't access the database
+    */
    public abstract Collection<FeedReader> getMemoryReaders() throws IOException;
 
    /**
@@ -121,7 +147,9 @@ public abstract class DBInterface
          Method meth = obj.getClass()
                .getMethod("get" + property.substring(0, 1).toUpperCase() + property.substring(1),
                      new Class[0]);
+         logger.log(Level.INFO, "Invoking " + meth + " on " + obj.getClass());
          Object retValue = meth.invoke(obj, new Object[0]);
+         logger.log(Level.INFO, "Got: " + retValue);
          return retValue;
       }
       catch (NoSuchMethodException e)

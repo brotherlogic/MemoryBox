@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +38,9 @@ public class DiscogsFeedReader extends JSONFeedReader
    /** THe access token generated in oauth */
    private Token accessToken;
 
+   /** Logger used for logging */
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
+
    /** The OAuth service used to pull URLS */
    private OAuthService service;
 
@@ -45,8 +50,6 @@ public class DiscogsFeedReader extends JSONFeedReader
       try
       {
          DiscogsMemory mem = new DiscogsMemory();
-         String artistString = "";
-         JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
          mem.setUniqueID(json.getString("id"));
          System.out.println(json);
          mem.setImagePath(DBFactory
@@ -55,9 +58,17 @@ public class DiscogsFeedReader extends JSONFeedReader
                .download(
                      new URL(convertImage(json.getJSONObject("basic_information")
                            .getString("thumb")))));
+
+         String artistString = "";
+         JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
          for (int i = 0; i < artArr.length(); i++)
             artistString += artArr.getJSONObject(i).getString("name");
          mem.setArtist(artistString);
+
+         mem.setTitle(json.getJSONObject("basic_information").getString("title"));
+         mem.setReleaseYear(json.getJSONObject("basic_information").getInt("year"));
+         mem.setUniqueID(json.getString("id"));
+
          return mem;
       }
       catch (MalformedURLException e)
@@ -71,10 +82,12 @@ public class DiscogsFeedReader extends JSONFeedReader
     * 
     * @param url
     *           The url to convert
-    * @return The name of the resolved url
+    * @return The name of the resolved url or null if a null string was passed
+    *         in
     */
    private String convertImage(final String url)
    {
+      logger.log(Level.INFO, "Converting " + url);
       String[] elems = url.split("-");
       return elems[0] + "-" + elems[2] + "-" + elems[3];
    }
@@ -94,14 +107,14 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected void login() throws IOException
    {
+      logger.log(Level.INFO, "Discogs log in");
+
       service = new ServiceBuilder()
             .provider(DiscogsAPI.class)
             .apiKey(Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.key"))
             .apiSecret(
                   Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.secret"))
             .build();
-
-      System.out.println("HERE");
 
       try
       {

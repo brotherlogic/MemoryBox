@@ -1,10 +1,15 @@
 package com.brotherlogic.memory;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.brotherlogic.memory.core.DiscogsMemory;
 import com.brotherlogic.memory.core.UntappdMemory;
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DownloadQueue;
 import com.brotherlogic.memory.feeds.FeedReader;
 import com.brotherlogic.memory.feeds.UntappdFeedReader;
+import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
 
 /**
  * Test bed for updating the database from the command line
@@ -19,14 +24,15 @@ public class CommandLineUpdate
     * 
     * @param args
     *           CL Params are not used
-    * @throws Exception
-    *            if something goes wrong
     */
-   public static void main(final String[] args) throws Exception
+   public static void main(final String[] args)
    {
       CommandLineUpdate clu = new CommandLineUpdate();
       clu.run();
    }
+
+   /** The logger to be used */
+   private final Logger logger = Logger.getLogger(this.getClass().getName());
 
    /**
     * Runs the stuff
@@ -34,19 +40,32 @@ public class CommandLineUpdate
     * @throws Exception
     *            if something goes wrong
     */
-   public void run() throws Exception
+   public void run()
    {
       // Start up the download queue
       DownloadQueue queue = DBFactory.buildInterface().getDownloadQueue();
       Thread downloadThread = new Thread(queue);
       downloadThread.start();
 
-      // Add the untapped reader
-      DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
-            "brotherlogic");
+      try
+      {
+         // Add the things we want
+         logger.log(Level.INFO, "Adding memory classes");
+         DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
+               "brotherlogic");
+         DBFactory.buildInterface().followMemory(DiscogsMemory.class, DiscogsFeedReader.class, "");
 
-      for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
-         reader.update();
+         logger.log(Level.INFO, "Updating readers");
+         for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
+         {
+            logger.log(Level.INFO, "Starting Update " + reader.getClass());
+            reader.update();
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       queue.slowStop();
    }
