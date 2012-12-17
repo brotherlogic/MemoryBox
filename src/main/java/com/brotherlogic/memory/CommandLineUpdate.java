@@ -51,15 +51,13 @@ public class CommandLineUpdate
       {
          // Add the things we want
          logger.log(Level.INFO, "Adding memory classes");
-         DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
-               "brotherlogic");
          DBFactory.buildInterface().followMemory(DiscogsMemory.class, DiscogsFeedReader.class, "");
 
          logger.log(Level.INFO, "Updating readers");
          for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())
          {
             logger.log(Level.INFO, "Starting Update " + reader.getClass());
-            reader.update();
+            reader.updateAllMemories(true);
          }
       }
       catch (Exception e)

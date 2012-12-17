@@ -3,6 +3,7 @@ package com.brotherlogic.memory.feeds.discogs;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -14,6 +15,12 @@ import org.xml.sax.helpers.DefaultHandler;
 public class MusicbrainzArtistMatch
 {
    private static MusicbrainzArtistMatch singleton = null;
+
+   public static void main(String[] args) throws Exception
+   {
+      String artist = "William S. Fischer";
+      System.out.println(MusicbrainzArtistMatch.getMatcher().getSortName(artist));
+   }
 
    public static MusicbrainzArtistMatch getMatcher()
    {
@@ -35,7 +42,7 @@ public class MusicbrainzArtistMatch
    public String getSortName(String artistName) throws IOException
    {
       String urlStr = "http://musicbrainz.org/ws/2/artist?query=artist:"
-            + artistName.replace(" ", "%20");
+            + URLEncoder.encode(artistName, "UTF-8");
       URL url = new URL(urlStr);
 
       try

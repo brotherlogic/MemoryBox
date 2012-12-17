@@ -21,6 +21,7 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+import com.brotherlogic.memory.Constants;
 import com.brotherlogic.memory.core.DiscogsMemory;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
@@ -101,7 +102,16 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected URL getFeedURL(final long pagination) throws MalformedURLException
    {
-      return new URL("http://api.discogs.com/users/brotherlogic/collection/folders/242017/releases");
+      logger.log(Level.INFO, "Reading with pag " + pagination);
+
+      if (pagination < 0)
+         return new URL(
+               "http://api.discogs.com/users/brotherlogic/collection/folders/242017/releases");
+      else
+         return new URL(
+               "http://api.discogs.com/users/brotherlogic/collection/folders/242017/releases?page="
+                     + pagination);
+
    }
 
    @Override
@@ -109,17 +119,14 @@ public class DiscogsFeedReader extends JSONFeedReader
    {
       logger.log(Level.INFO, "Discogs log in");
 
-      service = new ServiceBuilder()
-            .provider(DiscogsAPI.class)
-            .apiKey(Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.key"))
-            .apiSecret(
-                  Config.getConfig("http://edip:8085/configstore/").getParameter("discogs.secret"))
+      service = new ServiceBuilder().provider(DiscogsAPI.class)
+            .apiKey(Config.getConfig(Constants.CONFIG_SERVER).getParameter("discogs.key"))
+            .apiSecret(Config.getConfig(Constants.CONFIG_SERVER).getParameter("discogs.secret"))
             .build();
 
       try
       {
-         Object o = Config.getConfig("http://edip:8085/configstore/").retrieveObject(
-               "discogs.accessToken");
+         Object o = Config.getConfig(Constants.CONFIG_SERVER).retrieveObject("discogs.accessToken");
          System.out.println(o);
          if (o == null)
          {
@@ -129,7 +136,7 @@ public class DiscogsFeedReader extends JSONFeedReader
             Verifier verifier = new Verifier(in.nextLine());
             accessToken = service.getAccessToken(requestToken, verifier);
 
-            Config.getConfig("http://edip:8085/configstore/").storeObject("discogs.accessToken",
+            Config.getConfig(Constants.CONFIG_SERVER).storeObject("discogs.accessToken",
                   accessToken);
          }
          else
@@ -144,7 +151,12 @@ public class DiscogsFeedReader extends JSONFeedReader
    @Override
    protected long processFeedText(final String text) throws JSONException
    {
+      System.out.println("TEXT = " + text);
       JSONObject obj = new JSONObject(text);
+
+      if (!obj.has("releases"))
+         return -1;
+
       JSONArray arr = obj.getJSONArray("releases");
       for (int i = 0; i < arr.length(); i++)
       {
@@ -152,16 +164,19 @@ public class DiscogsFeedReader extends JSONFeedReader
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
 
-      return -1L;
+      return (obj.getJSONObject("pagination").getInt("page") + 1);
    }
 
    @Override
-   protected String read(final URL urlToRead)
+   protected String read(final URL urlToRead) throws IOException
    {
+      if (service == null)
+         login();
+
       System.out.println("Service = " + service);
       OAuthRequest request = new OAuthRequest(Verb.GET, urlToRead.toString());
       service.signRequest(accessToken, request);
-      System.out.println("REQUEST = " + request.getSanitizedUrl());
+      System.out.println("REQUEST = " + request.getUrl() + " from " + urlToRead);
       Response response = request.send();
       return response.getBody();
    }

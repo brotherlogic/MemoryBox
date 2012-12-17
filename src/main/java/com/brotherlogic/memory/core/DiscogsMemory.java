@@ -11,6 +11,21 @@ public class DiscogsMemory extends Memory implements ImageMemory
    /** The name of the artist */
    private String artist;
 
+   private String sortArtist;
+
+   @Annotation
+   public String getSortArtist()
+   {
+      if (artist.equals("Various"))
+         return title;
+      return sortArtist;
+   }
+
+   public void setSortArtist(String sortArtist)
+   {
+      this.sortArtist = sortArtist;
+   }
+
    /** The path to the given image file */
    private String imagePath;
 
@@ -27,9 +42,9 @@ public class DiscogsMemory extends Memory implements ImageMemory
          return super.compareTo(mem);
       DiscogsMemory o = (DiscogsMemory) mem;
 
-      if (artist != null && o.artist != null)
+      if (getSortArtist() != null && o.getSortArtist() != null)
       {
-         int artComp = artist.compareTo(o.artist);
+         int artComp = getSortArtist().compareTo(o.getSortArtist());
          if (artComp != 0)
             return artComp;
       }

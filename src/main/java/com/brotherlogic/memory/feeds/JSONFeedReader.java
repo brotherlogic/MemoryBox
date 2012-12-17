@@ -78,6 +78,8 @@ public abstract class JSONFeedReader extends FeedReader
     */
    protected Collection<Memory> gatherObjects(final int number) throws IOException, JSONException
    {
+      logger.log(Level.INFO, "Gathering " + number);
+
       List<Memory> objects = new LinkedList<Memory>();
 
       long pagination = -1;
@@ -179,7 +181,7 @@ public abstract class JSONFeedReader extends FeedReader
     */
    protected String read(final URL urlToRead) throws IOException
    {
-      logger.log(Level.INFO, "Reading " + urlToRead);
+      logger.log(Level.INFO, "READING " + urlToRead);
       StringBuffer readText = new StringBuffer();
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(urlToRead.openStream()));
@@ -202,6 +204,7 @@ public abstract class JSONFeedReader extends FeedReader
          if (updateUnderlying)
          {
             Collection<Memory> objects = gatherObjects(Integer.MAX_VALUE);
+            logger.log(Level.INFO, "GATHERED " + objects.size() + " objects");
             for (Memory obj : objects)
             {
                // Store the memory and the underlying representation
