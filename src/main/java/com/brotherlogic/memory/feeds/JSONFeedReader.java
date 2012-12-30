@@ -138,27 +138,6 @@ public abstract class JSONFeedReader extends FeedReader
       return consList;
    }
 
-   @Override
-   public Memory probeFeed() throws IOException
-   {
-      logger.log(Level.INFO, "Probing Feed");
-      try
-      {
-         login();
-         Collection<Memory> cons = gatherObjects(1);
-         logger.log(Level.INFO, "Objects gathered");
-         List<Memory> memorys = new LinkedList<Memory>();
-         for (Memory con : cons)
-            memorys.add(con);
-         logger.log(Level.INFO, "Probe Done");
-         return memorys.get(0);
-      }
-      catch (JSONException e)
-      {
-         throw new IOException(e);
-      }
-   }
-
    /**
     * Process the feed text and turn it into objects
     * 
@@ -229,45 +208,5 @@ public abstract class JSONFeedReader extends FeedReader
       {
          throw new IOException(e);
       }
-   }
-
-   @Override
-   public void updateMemories(final String uid) throws IOException
-   {
-      try
-      {
-         List<Memory> objects = new LinkedList<Memory>();
-
-         long pagination = -1;
-         boolean timestampOver = false;
-         while (!timestampOver)
-         {
-            // Pull the feed and build the objects
-            String feedText = read(getFeedURL(pagination));
-            long nextPage = processFeedText(feedText);
-            for (Memory obj : popReadObjects())
-               if (!obj.getUniqueID().equals(uid))
-                  objects.add(obj);
-               else
-                  timestampOver = true;
-
-            if (nextPage < 0)
-               break;
-            else
-               pagination = nextPage;
-         }
-
-         // Update all the objects
-         for (Memory obj : objects)
-         {
-            Memory m = obj;
-            DBFactory.buildInterface().storeMemory(m);
-         }
-      }
-      catch (JSONException e)
-      {
-         e.printStackTrace();
-      }
-
    }
 }

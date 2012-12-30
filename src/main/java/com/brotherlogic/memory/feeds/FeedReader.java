@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.brotherlogic.memory.core.Memory;
-import com.brotherlogic.memory.db.DBFactory;
 
 /**
  * An abstraction of a feed reader
@@ -38,15 +37,6 @@ public abstract class FeedReader
    protected abstract void login() throws IOException;
 
    /**
-    * Probes the feed - returns the latest memory
-    * 
-    * @return The latest Memory present in the feed
-    * @throws IOException
-    *            if something goes wrong with reading
-    */
-   public abstract Memory probeFeed() throws IOException;
-
-   /**
     * Updates all the feed
     * 
     * @throws IOException
@@ -56,35 +46,7 @@ public abstract class FeedReader
    {
       logger.log(Level.INFO, "Logging in");
       login();
-      Memory mem = probeFeed();
-      Memory topDBMem = null;
-      if (mem != null)
-         topDBMem = DBFactory.buildInterface().retrieveLatestMemory(mem.getClass());
-
-      logger.log(Level.INFO, "Got " + mem + " and " + topDBMem);
-
-      if (topDBMem != null)
-         logger.log(Level.INFO, "Also: " + topDBMem.isFilled());
-
-      // Check on the versions - we may not have got any DB Mems
-      if (topDBMem == null)
-         updateAllMemories(true);
-      else if (!topDBMem.isFilled())
-         updateAllMemories(false);
-      else
-      {
-         logger.log(Level.INFO, "Top " + topDBMem.getUniqueID() + " and " + mem.getUniqueID());
-         logger.log(Level.INFO, "Top = " + mem);
-         logger.log(Level.INFO, "DBTOP = " + topDBMem);
-
-         // Check on the underlying representations
-         String retBase = getUnderlyingRepresentation(mem);
-         String givenBase = DBFactory.buildBaseRepStore().getBaseRep(mem);
-         if (!retBase.equals(givenBase))
-            updateAllMemories(true);
-         else if (!mem.getUniqueID().equals(topDBMem.getUniqueID()))
-            updateMemories(topDBMem.getUniqueID());
-      }
+      updateAllMemories(true);
    }
 
    /**
@@ -97,14 +59,4 @@ public abstract class FeedReader
     *            if we can't update the memories
     */
    public abstract void updateAllMemories(boolean alsoUpdateUnderlying) throws IOException;
-
-   /**
-    * Update the memories up to the latest version
-    * 
-    * @param uid
-    *           The latest memory to pull memories up to
-    * @throws IOException
-    *            if we can't update the memories
-    */
-   public abstract void updateMemories(String uid) throws IOException;
 }
