@@ -82,15 +82,16 @@ public abstract class JSONFeedReader extends FeedReader
 
       List<Memory> objects = new LinkedList<Memory>();
 
-      long pagination = -1;
+      String pagination = "";
       while (objects.size() < number)
       {
          // Pull the feed and build the objects
          String feedText = read(getFeedURL(pagination));
-         long nextPage = processFeedText(feedText);
+         String nextPage = processFeedText(feedText);
+         System.out.println("NEXT = " + nextPage);
          objects.addAll(popReadObjects());
 
-         if (nextPage < 0)
+         if (nextPage == null)
             break;
          else
             pagination = nextPage;
@@ -115,7 +116,7 @@ public abstract class JSONFeedReader extends FeedReader
     * @throws MalformedURLException
     *            if we can't parse the URL
     */
-   protected abstract URL getFeedURL(long pagination) throws MalformedURLException;
+   protected abstract URL getFeedURL(String pagination) throws MalformedURLException;
 
    @Override
    public String getUnderlyingRepresentation(final Memory mem) throws IOException
@@ -147,7 +148,7 @@ public abstract class JSONFeedReader extends FeedReader
     * @throws JSONException
     *            if we can't parse the text
     */
-   protected abstract long processFeedText(String text) throws JSONException;
+   protected abstract String processFeedText(String text) throws JSONException;
 
    /**
     * Read a URL and turn into text

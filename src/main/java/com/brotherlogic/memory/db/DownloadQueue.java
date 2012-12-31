@@ -123,9 +123,9 @@ public abstract class DownloadQueue implements Runnable
       // Create the file if necessary - we don't download if the file already
       // exists
       File f = new File(downloadable.getPathToStore());
-      if (!f.exists())
+      if (!f.exists() || f.length() == 0)
       {
-         if (!f.createNewFile())
+         if (!f.exists() && !f.createNewFile())
             throw new IOException("Cannot create file: " + f.getAbsolutePath());
 
          logger.log(Level.INFO, "Downloading: " + downloadable.getDownloadLocation());
@@ -244,6 +244,7 @@ public abstract class DownloadQueue implements Runnable
     */
    public void slowStop()
    {
+      logger.log(Level.INFO, "Running a slow stop");
       slowStop = true;
    }
 }

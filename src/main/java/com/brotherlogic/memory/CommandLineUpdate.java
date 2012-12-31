@@ -3,13 +3,11 @@ package com.brotherlogic.memory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.brotherlogic.memory.core.DiscogsMemory;
-import com.brotherlogic.memory.core.UntappdMemory;
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.db.DownloadQueue;
 import com.brotherlogic.memory.feeds.FeedReader;
-import com.brotherlogic.memory.feeds.UntappdFeedReader;
-import com.brotherlogic.memory.feeds.discogs.DiscogsFeedReader;
+import com.brotherlogic.memory.feeds.instagram.InstagramFeedReader;
+import com.brotherlogic.memory.feeds.instagram.InstagramMemory;
 
 /**
  * Test bed for updating the database from the command line
@@ -51,9 +49,13 @@ public class CommandLineUpdate
       {
          // Add the things we want
          logger.log(Level.INFO, "Adding memory classes");
-         DBFactory.buildInterface().followMemory(DiscogsMemory.class, DiscogsFeedReader.class, "");
-         DBFactory.buildInterface().followMemory(UntappdMemory.class, UntappdFeedReader.class,
-               "brotherlogic");
+         // DBFactory.buildInterface().followMemory(DiscogsMemory.class,
+         // DiscogsFeedReader.class, "");
+         // DBFactory.buildInterface().followMemory(UntappdMemory.class,
+         // UntappdFeedReader.class,
+         // "brotherlogic");
+         DBFactory.buildInterface().followMemory(InstagramMemory.class, InstagramFeedReader.class,
+               "");
 
          logger.log(Level.INFO, "Updating readers");
          for (FeedReader reader : DBFactory.buildInterface().getMemoryReaders())

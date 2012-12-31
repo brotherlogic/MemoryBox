@@ -100,11 +100,11 @@ public class DiscogsFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(final long pagination) throws MalformedURLException
+   protected URL getFeedURL(final String pagination) throws MalformedURLException
    {
       logger.log(Level.INFO, "Reading with pag " + pagination);
 
-      if (pagination < 0)
+      if (pagination.equals(""))
          return new URL(
                "http://api.discogs.com/users/brotherlogic/collection/folders/242017/releases");
       else
@@ -149,13 +149,13 @@ public class DiscogsFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(final String text) throws JSONException
+   protected String processFeedText(final String text) throws JSONException
    {
       System.out.println("TEXT = " + text);
       JSONObject obj = new JSONObject(text);
 
       if (!obj.has("releases"))
-         return -1;
+         return null;
 
       JSONArray arr = obj.getJSONArray("releases");
       for (int i = 0; i < arr.length(); i++)
@@ -164,7 +164,7 @@ public class DiscogsFeedReader extends JSONFeedReader
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
 
-      return (obj.getJSONObject("pagination").getInt("page") + 1);
+      return "" + (obj.getJSONObject("pagination").getInt("page") + 1);
    }
 
    @Override

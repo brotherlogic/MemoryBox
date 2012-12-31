@@ -91,7 +91,7 @@ public class UntappdFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(final long pagination) throws MalformedURLException
+   protected URL getFeedURL(final String pagination) throws MalformedURLException
    {
       String urlText = baseURL + "/user/checkins/" + username;
 
@@ -101,7 +101,7 @@ public class UntappdFeedReader extends JSONFeedReader
             + "&client_id="
             + Config.getConfig("http://edip:8085/configstore/").getParameter("untappd.id");
 
-      if (pagination > 0)
+      if (!pagination.equals(""))
          urlText += "&max_id=" + pagination;
 
       return new URL(urlText);
@@ -115,7 +115,7 @@ public class UntappdFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(final String text) throws JSONException
+   protected String processFeedText(final String text) throws JSONException
    {
       JSONObject obj = new JSONObject(text);
 
@@ -132,6 +132,6 @@ public class UntappdFeedReader extends JSONFeedReader
          Memory mem = buildMemory(arr.getJSONObject(i));
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
-      return nextVal;
+      return "" + nextVal;
    }
 }

@@ -72,7 +72,7 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected URL getFeedURL(final long pagination) throws MalformedURLException
+   protected URL getFeedURL(final String pagination) throws MalformedURLException
    {
       return new URL("https://api.github.com/users/" + username + "/events");
    }
@@ -85,7 +85,7 @@ public class GitEventFeedReader extends JSONFeedReader
    }
 
    @Override
-   protected long processFeedText(final String text) throws JSONException
+   protected String processFeedText(final String text) throws JSONException
    {
       JSONArray arr = new JSONArray(text);
 
@@ -102,6 +102,6 @@ public class GitEventFeedReader extends JSONFeedReader
       logger.log(Level.INFO, "Done");
 
       // We only get one page of git events
-      return -1;
+      return null;
    }
 }
