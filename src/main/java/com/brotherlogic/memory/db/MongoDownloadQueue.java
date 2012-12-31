@@ -19,6 +19,15 @@ import com.mongodb.DBObject;
  */
 public class MongoDownloadQueue extends DownloadQueue
 {
+   private static MongoDownloadQueue singleton = null;
+
+   public static MongoDownloadQueue build()
+   {
+      if (singleton == null)
+         singleton = new MongoDownloadQueue();
+      return singleton;
+   }
+
    /** used to log events */
    private final Logger logger = Logger.getLogger("com.brotherlogic.memory.db.MongoDownloadQueue");
 
@@ -28,7 +37,8 @@ public class MongoDownloadQueue extends DownloadQueue
    @Override
    protected void addToQueue(final Downloadable dl)
    {
-      logger.log(Level.INFO, "Adding " + dl.getDownloadLocation() + " to download queue");
+      logger.log(Level.INFO, "Adding " + dl.getDownloadLocation() + " to download queue " + queue
+            + " from " + this);
 
       connect();
 
@@ -36,7 +46,9 @@ public class MongoDownloadQueue extends DownloadQueue
       add.put("url", dl.getDownloadLocation().toString());
       add.put("file", dl.getPathToStore());
 
+      logger.log(Level.INFO, "Inserting object to queue " + queue);
       queue.insert(add);
+      logger.log(Level.INFO, "Inserted");
 
       logger.log(Level.INFO, "Added " + dl.getDownloadLocation() + " to download queue");
    }

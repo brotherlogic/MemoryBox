@@ -174,7 +174,7 @@ public class MongoInterface extends DBInterface
    @Override
    public DownloadQueue getDownloadQueue()
    {
-      return new MongoDownloadQueue();
+      return MongoDownloadQueue.build();
    }
 
    @Override
@@ -210,7 +210,7 @@ public class MongoInterface extends DBInterface
                logger.log(Level.INFO, "Getting no parameter constructor");
                cons = reader.getConstructor();
             }
-            logger.log(Level.INFO, "Got reader - now constructing");
+            logger.log(Level.INFO, "Got reader - now constructing :" + params + ": with " + cons);
 
             if (params != null && params.length() > 0)
                readers.add((FeedReader) cons.newInstance(params));
@@ -219,6 +219,7 @@ public class MongoInterface extends DBInterface
          }
          catch (Exception e)
          {
+            e.printStackTrace();
             throw new IOException(e);
          }
       }
