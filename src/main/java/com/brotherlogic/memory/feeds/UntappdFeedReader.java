@@ -132,6 +132,10 @@ public class UntappdFeedReader extends JSONFeedReader
          Memory mem = buildMemory(arr.getJSONObject(i));
          addObjectToRead(mem, arr.getJSONObject(i).toString());
       }
+
+      if (nextVal == -1)
+         return null;
+
       return "" + nextVal;
    }
 }

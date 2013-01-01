@@ -147,8 +147,6 @@ public abstract class DownloadQueue implements Runnable
          writer.close();
       }
 
-      removeFromQueue(downloadable);
-
       return doneDownload;
    }
 
@@ -232,6 +230,10 @@ public abstract class DownloadQueue implements Runnable
             catch (IOException e)
             {
                e.printStackTrace();
+            }
+            finally
+            {
+               removeFromQueue(next);
             }
          else if (slowStop)
             running = false;
