@@ -23,7 +23,7 @@ public class RecordCollection
          if (dMem.getSortArtist() == null)
             try
             {
-               dMem.setSortArtist(MusicbrainzArtistMatch.getMatcher().getSortName(dMem.getArtist()));
+               dMem.setSortArtist(MusicbrainzArtistMatch.getMatcher().(dMem.getArtist()));
                DBFactory.buildInterface().storeMemory(dMem);
             }
             catch (IOException e)
@@ -32,10 +32,7 @@ public class RecordCollection
             }
 
          if (dMem.getSortArtist() == null)
-         {
             System.err.println("No Sort Name for: " + dMem.getArtist());
-            System.exit(1);
-         }
       }
 
       System.out.println(records.size());

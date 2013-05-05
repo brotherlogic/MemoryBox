@@ -22,7 +22,6 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.brotherlogic.memory.Constants;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
 import com.brotherlogic.memory.feeds.Config;
@@ -31,15 +30,18 @@ import com.brotherlogic.memory.feeds.JSONFeedReader;
 
 public class FlickrFeedReader extends JSONFeedReader
 {
-   Logger logger = Logger.getLogger(getClass().getName());
-
-   /** The OAuth service used to pull URLS */
-   private OAuthService service;
-
    public static void main(String[] args)
    {
       FeedReader reader = new FlickrFeedReader();
    }
+
+   /** THe access token generated in oauth */
+   private Token accessToken;
+
+   Logger logger = Logger.getLogger(getClass().getName());
+
+   /** The OAuth service used to pull URLS */
+   private OAuthService service;
 
    @Override
    protected Memory buildMemory(JSONObject json) throws JSONException
@@ -74,12 +76,36 @@ public class FlickrFeedReader extends JSONFeedReader
    {
       String url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&user_id=me&per_page=500&extras=url_o&format=json";
       if (pagination.equals(""))
-      {
          return new URL(url);
-      }
       else
          return new URL(url + "&page=" + pagination);
 
+   }
+
+   @Override
+   protected void login() throws IOException
+   {
+      logger.log(Level.INFO, "Flickr log in");
+
+      service = new ServiceBuilder().provider(FlickrApi.class)
+            .apiKey(Config.getConfig().getParameter("flickr.key"))
+            .apiSecret(Config.getConfig().getParameter("flickr.secret"))
+            .callback("http://www.dcs.shef.ac.uk/~sat").build();
+      try
+      {
+         Scanner in = new Scanner(System.in);
+
+         Token requestToken = service.getRequestToken();
+         String authorizationUrl = service.getAuthorizationUrl(requestToken);
+         Desktop.getDesktop().browse(new URI(authorizationUrl + "&perms=read"));
+         Verifier verifier = new Verifier(in.nextLine());
+         accessToken = service.getAccessToken(requestToken, verifier);
+
+      }
+      catch (URISyntaxException e)
+      {
+         throw new IOException(e);
+      }
    }
 
    @Override
@@ -103,44 +129,6 @@ public class FlickrFeedReader extends JSONFeedReader
 
       return max_id;
    }
-
-   @Override
-   protected void login() throws IOException
-   {
-      logger.log(Level.INFO, "Flickr log in");
-
-      service = new ServiceBuilder().provider(FlickrApi.class)
-            .apiKey(Config.getConfig(Constants.CONFIG_SERVER).getParameter("flickr.key"))
-            .apiSecret(Config.getConfig(Constants.CONFIG_SERVER).getParameter("flickr.secret"))
-            .callback("http://www.dcs.shef.ac.uk/~sat").build();
-
-      try
-      {
-         Object o = Config.getConfig(Constants.CONFIG_SERVER).retrieveObject("flickr.accessToken");
-         if (o == null)
-         {
-            Scanner in = new Scanner(System.in);
-
-            Token requestToken = service.getRequestToken();
-            String authorizationUrl = service.getAuthorizationUrl(requestToken);
-            Desktop.getDesktop().browse(new URI(authorizationUrl + "&perms=read"));
-            Verifier verifier = new Verifier(in.nextLine());
-            accessToken = service.getAccessToken(requestToken, verifier);
-
-            Config.getConfig(Constants.CONFIG_SERVER)
-                  .storeObject("flickr.accessToken", accessToken);
-         }
-         else
-            accessToken = (Token) o;
-      }
-      catch (URISyntaxException e)
-      {
-         throw new IOException(e);
-      }
-   }
-
-   /** THe access token generated in oauth */
-   private Token accessToken;
 
    @Override
    protected String read(final URL urlToRead) throws IOException

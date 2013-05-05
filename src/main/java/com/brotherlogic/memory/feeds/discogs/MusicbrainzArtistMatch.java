@@ -16,17 +16,17 @@ public class MusicbrainzArtistMatch
 {
    private static MusicbrainzArtistMatch singleton = null;
 
-   public static void main(String[] args) throws Exception
-   {
-      String artist = "William S. Fischer";
-      System.out.println(MusicbrainzArtistMatch.getMatcher().getSortName(artist));
-   }
-
    public static MusicbrainzArtistMatch getMatcher()
    {
       if (singleton == null)
          singleton = new MusicbrainzArtistMatch();
       return singleton;
+   }
+
+   public static void main(String[] args) throws Exception
+   {
+      String artist = "William S. Fischer";
+      System.out.println(MusicbrainzArtistMatch.getMatcher().getSortName(artist));
    };
 
    long lastCall = 0;
@@ -51,22 +51,23 @@ public class MusicbrainzArtistMatch
 
          // Wait one second between concurrent connections
          long waitTime = System.currentTimeMillis() - lastCall;
-         if (waitTime < 1000)
+         if (waitTime < 2000)
             try
             {
-               Thread.sleep(waitTime);
+               System.out.println("Sleeping:" + waitTime);
+               Thread.sleep(2000 - waitTime);
             }
             catch (InterruptedException e)
             {
                e.printStackTrace();
             }
 
-         lastCall = System.currentTimeMillis();
          HttpURLConnection uc = (HttpURLConnection) url.openConnection();
          SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
          SortName sName = new SortName();
          parser.parse(uc.getInputStream(), sName);
 
+         lastCall = System.currentTimeMillis();
          return sName.getSort();
       }
       catch (SAXException e)

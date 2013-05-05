@@ -21,7 +21,6 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.brotherlogic.memory.Constants;
 import com.brotherlogic.memory.core.DiscogsMemory;
 import com.brotherlogic.memory.core.Memory;
 import com.brotherlogic.memory.db.DBFactory;
@@ -52,13 +51,14 @@ public class DiscogsFeedReader extends JSONFeedReader
       {
          DiscogsMemory mem = new DiscogsMemory();
          mem.setUniqueID(json.getString("id"));
-         System.out.println(json);
-         mem.setImagePath(DBFactory
-               .buildInterface()
-               .getDownloadQueue()
-               .download(
-                     new URL(convertImage(json.getJSONObject("basic_information")
-                           .getString("thumb")))));
+         if (json.getJSONObject("basic_information").getString("thumb") != null
+               && !json.getJSONObject("basic_information").getString("thumb").equals("null"))
+            mem.setImagePath(DBFactory
+                  .buildInterface()
+                  .getDownloadQueue()
+                  .download(
+                        new URL(convertImage(json.getJSONObject("basic_information").getString(
+                              "thumb")))));
 
          String artistString = "";
          JSONArray artArr = json.getJSONObject("basic_information").getJSONArray("artists");
@@ -88,7 +88,7 @@ public class DiscogsFeedReader extends JSONFeedReader
     */
    private String convertImage(final String url)
    {
-      logger.log(Level.INFO, "Converting " + url);
+      System.out.println("CONVERTING = " + url);
       String[] elems = url.split("-");
       return elems[0] + "-" + elems[2] + "-" + elems[3];
    }
@@ -120,27 +120,16 @@ public class DiscogsFeedReader extends JSONFeedReader
       logger.log(Level.INFO, "Discogs log in");
 
       service = new ServiceBuilder().provider(DiscogsAPI.class)
-            .apiKey(Config.getConfig(Constants.CONFIG_SERVER).getParameter("discogs.key"))
-            .apiSecret(Config.getConfig(Constants.CONFIG_SERVER).getParameter("discogs.secret"))
-            .build();
+            .apiKey(Config.getConfig().getParameter("discogs_key"))
+            .apiSecret(Config.getConfig().getParameter("discogs_secret")).build();
 
       try
       {
-         Object o = Config.getConfig(Constants.CONFIG_SERVER).retrieveObject("discogs.accessToken");
-         System.out.println(o);
-         if (o == null)
-         {
-            Scanner in = new Scanner(System.in);
-            Token requestToken = service.getRequestToken();
-            Desktop.getDesktop().browse(new URI(service.getAuthorizationUrl(requestToken)));
-            Verifier verifier = new Verifier(in.nextLine());
-            accessToken = service.getAccessToken(requestToken, verifier);
-
-            Config.getConfig(Constants.CONFIG_SERVER).storeObject("discogs.accessToken",
-                  accessToken);
-         }
-         else
-            accessToken = (Token) o;
+         Scanner in = new Scanner(System.in);
+         Token requestToken = service.getRequestToken();
+         Desktop.getDesktop().browse(new URI(service.getAuthorizationUrl(requestToken)));
+         Verifier verifier = new Verifier(in.nextLine());
+         accessToken = service.getAccessToken(requestToken, verifier);
       }
       catch (URISyntaxException e)
       {
