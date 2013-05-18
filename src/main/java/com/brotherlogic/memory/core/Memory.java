@@ -40,7 +40,6 @@ public abstract class Memory implements Comparable<Memory>
       if (!obj.getClass().equals(this.getClass()))
          return false;
 
-      System.out.println(uniqueID + " and " + ((Memory) obj).getUniqueID());
       return (uniqueID.equals(((Memory) obj).uniqueID));
    }
 

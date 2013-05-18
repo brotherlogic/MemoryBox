@@ -11,27 +11,14 @@ public class DiscogsMemory extends Memory implements ImageMemory
    /** The name of the artist */
    private String artist;
 
-   private String sortArtist;
-
-   @Annotation
-   public String getSortArtist()
-   {
-      if (artist.equals("Various"))
-         return title;
-      return sortArtist;
-   }
-
-   public void setSortArtist(String sortArtist)
-   {
-      this.sortArtist = sortArtist;
-   }
-
    /** The path to the given image file */
    private String imagePath;
 
    private Double releaseOrder;
 
    private Integer releaseYear;
+
+   private String sortArtist;
 
    private String title;
 
@@ -45,6 +32,12 @@ public class DiscogsMemory extends Memory implements ImageMemory
       if (getSortArtist() != null && o.getSortArtist() != null)
       {
          int artComp = getSortArtist().compareTo(o.getSortArtist());
+         if (artComp != 0)
+            return artComp;
+      }
+      else
+      {
+         int artComp = getArtist().compareTo(o.getArtist());
          if (artComp != 0)
             return artComp;
       }
@@ -93,6 +86,14 @@ public class DiscogsMemory extends Memory implements ImageMemory
       return releaseYear;
    }
 
+   @Annotation
+   public String getSortArtist()
+   {
+      if (artist.equals("Various"))
+         return title;
+      return sortArtist;
+   }
+
    @Override
    @Annotation
    public Long getTimestamp()
@@ -131,6 +132,11 @@ public class DiscogsMemory extends Memory implements ImageMemory
    public void setReleaseYear(Integer releaseYear)
    {
       this.releaseYear = releaseYear;
+   }
+
+   public void setSortArtist(String sortArtist)
+   {
+      this.sortArtist = sortArtist;
    }
 
    public void setTitle(String title)

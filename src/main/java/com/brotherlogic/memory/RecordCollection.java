@@ -12,7 +12,7 @@ import com.brotherlogic.memory.feeds.discogs.MusicbrainzArtistMatch;
 
 public class RecordCollection
 {
-   public static void main(String[] args) throws IOException
+   public void sort() throws IOException
    {
       Collection<Memory> records = DBFactory.buildInterface().retrieveMemories(DiscogsMemory.class);
 
@@ -23,7 +23,7 @@ public class RecordCollection
          if (dMem.getSortArtist() == null)
             try
             {
-               dMem.setSortArtist(MusicbrainzArtistMatch.getMatcher().(dMem.getArtist()));
+               dMem.setSortArtist(MusicbrainzArtistMatch.getMatcher().getSortName(dMem.getArtist()));
                DBFactory.buildInterface().storeMemory(dMem);
             }
             catch (IOException e)
